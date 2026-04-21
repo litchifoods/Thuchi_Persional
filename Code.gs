@@ -4,20 +4,14 @@
 // ================================================================
 
 // ----------------------------------------------------------------
-//  CORS HELPER
+//  JSON RESPONSE HELPER
+//  Lưu ý: GAS không hỗ trợ setHeader() — CORS được xử lý tự động
+//  khi deploy với quyền "Mọi người"
 // ----------------------------------------------------------------
-function setCORSHeaders(output) {
-  output.setHeader('Access-Control-Allow-Origin', '*');
-  output.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  output.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  return output;
-}
-
 function jsonResponse(data) {
-  const output = ContentService
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return setCORSHeaders(output);
 }
 
 // ----------------------------------------------------------------
@@ -41,9 +35,8 @@ function doGet(e) {
   if (action === 'getReport')  return jsonResponse(getReport());
   if (action === 'getConfig')  return jsonResponse(getPublicConfig());
 
-  return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('💰 Quản Lý Thu Chi Cá Nhân')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  // Mặc định: trả về JSON thông báo GAS đang chạy
+  return jsonResponse({ success: true, message: 'GAS đang chạy ✅', version: '2.2' });
 }
 
 // ----------------------------------------------------------------
@@ -76,6 +69,7 @@ function doPost(e) {
       case 'analyze':         return jsonResponse(analyzeWithGemini(body.text));
       case 'saveTransaction': return jsonResponse(saveTransaction(body.data, body.settings));
       case 'askReport':       return jsonResponse(askAIReport(body.question));
+      case 'searchTransactions': return jsonResponse(searchTransactions(body.keyword));
       default:                return jsonResponse({ success: false, message: 'Action không hợp lệ: "' + action + '"' });
     }
   } catch (err) {
@@ -285,6 +279,76 @@ function saveTransaction(data, settings) {
   } catch (e) {
     return { success: false, message: 'Lỗi lưu giao dịch: ' + e.message };
   }
+}
+
+// ----------------------------------------------------------------
+//  TÌM KIẾM GIAO DỊCH
+// ----------------------------------------------------------------
+function searchTransactions(keyword) {
+  if (!keyword) return { success: false, message: 'Vui lòng nhập từ khóa tìm kiếm' };
+  const cfg = getConfig();
+  if (!cfg.sheetId) return { success: false, message: 'Chưa cấu hình Sheet ID' };
+
+  let ss;
+  try { ss = SpreadsheetApp.openById(cfg.sheetId); }
+  catch(e) { return { success: false, message: 'Không mở được Google Sheet: ' + e.message }; }
+
+  const kw = keyword.toLowerCase().trim();
+  const results = [];
+
+  // Kiểm tra lọc theo tháng
+  const now = new Date();
+  let filterMonth = -1, filterYear = -1;
+  if (kw.includes('tháng này')) {
+    filterMonth = now.getMonth(); filterYear = now.getFullYear();
+  } else if (kw.includes('tháng trước')) {
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    filterMonth = prev.getMonth(); filterYear = prev.getFullYear();
+  }
+
+  function searchSheet(sheetName, type) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
+    const data = sheet.getDataRange().getValues();
+    for (let i = 3; i < data.length; i++) {
+      const row = data[i];
+      if (!row[0] || isNaN(parseInt(row[0]))) continue;
+
+      const ngay    = row[1] instanceof Date ? row[1] : new Date(row[1]);
+      const soTien  = Number(row[2]) || 0;
+      const ten     = String(row[3] || '').toLowerCase();
+      const col4    = String(row[4] || '').toLowerCase();
+      const col5    = String(row[5] || '').toLowerCase();
+      const soTienStr = soTien.toString();
+
+      // Lọc theo tháng nếu có
+      if (filterMonth >= 0) {
+        if (isNaN(ngay.getTime())) continue;
+        if (ngay.getMonth() !== filterMonth || ngay.getFullYear() !== filterYear) continue;
+        results.push({ type, stt: row[0], ngay: _fmtDate(ngay), soTien, tenDoiTuong: row[3]||'', noiDung: (row[type==='thu'?5:4]||'') });
+        continue;
+      }
+
+      // Tìm theo từ khóa
+      if (ten.includes(kw) || col4.includes(kw) || col5.includes(kw) || soTienStr.includes(kw)) {
+        results.push({ type, stt: row[0], ngay: _fmtDate(ngay), soTien, tenDoiTuong: row[3]||'', noiDung: (row[type==='thu'?5:4]||'') });
+      }
+    }
+  }
+
+  searchSheet('THU', 'thu');
+  searchSheet('CHI', 'chi');
+
+  // Sắp xếp mới nhất lên đầu
+  results.sort((a, b) => new Date(b.ngay) - new Date(a.ngay));
+
+  return { success: true, results: results.slice(0, 50), total: results.length };
+}
+
+function _fmtDate(d) {
+  if (!d || isNaN(d.getTime())) return '';
+  const p = n => String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
 }
 
 // ----------------------------------------------------------------
