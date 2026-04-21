@@ -7,7 +7,7 @@ window.APP_CONFIG = {
 
   // ➤ Dán URL Google Apps Script của bạn vào đây (kết thúc bằng /exec)
   // Cách lấy: Apps Script → Triển khai → Quản lý triển khai → copy URL
-  gasUrl: 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxKd8SFZIrdJfu4prBsPw08lhPj9mjZ2OakrIQnUbxUjs8wvV9Nl5FPQJ1wQFUbD2ar/exec/exec',
+  gasUrl: 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxKd8SFZIrdJfu4prBsPw08lhPj9mjZ2OakrIQnUbxUjs8wvV9Nl5FPQJ1wQFUbD2ar/exec',
 
   // ➤ Tên hiển thị của ứng dụng
   appName: 'Thu Chi Cá Nhân'
