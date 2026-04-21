@@ -186,7 +186,12 @@ textarea{resize:vertical;min-height:68px}
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">💰 Thu Chi</div>
+    <div class="nav-logo">💰 Thu Chi
+      <span id="connDot" title="Trạng thái kết nối" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-left:8px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;vertical-align:middle">
+        <span id="connDotIcon" style="width:8px;height:8px;border-radius:50%;background:#fbbf24;display:inline-block"></span>
+        <span id="connDotText">Đang kiểm tra...</span>
+      </span>
+    </div>
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="goTab('home',this)">🏠 Nhập</button>
       <button class="tab-btn" onclick="goTab('report',this)">📊 Báo cáo</button>
@@ -282,22 +287,16 @@ textarea{resize:vertical;min-height:68px}
   </div>
 
   <div class="card">
-    <div class="card-title">🤖 Hỏi AI Về Tài Chính</div>
-    <div class="chat-box" id="chatBox">
-      <div class="cmsg bot">
-        <div style="font-size:26px">🤖</div>
-        <div class="cbub">Xin chào! Tôi có thể phân tích thu chi của bạn. Hỏi tôi bất kỳ điều gì!</div>
-      </div>
+    <div class="card-title">🔍 Tìm Kiếm Giao Dịch</div>
+    <div class="chat-row" style="margin-bottom:10px">
+      <input class="chat-in" id="searchIn" placeholder="Tìm theo tên, nội dung, số tiền..." onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="btn btn-primary" onclick="doSearch()">🔍</button>
     </div>
-    <div class="qbtns" style="margin-top:10px">
-      <button class="btn btn-outline" onclick="quickAsk('Tổng thu chi tháng này?')">📅 Tháng này</button>
-      <button class="btn btn-outline" onclick="quickAsk('Tôi đang lãi hay lỗ?')">💡 Lãi/lỗ?</button>
-      <button class="btn btn-outline" onclick="quickAsk('Tháng nào chi nhiều nhất?')">📈 Phân tích</button>
+    <div class="qbtns">
+      <button class="btn btn-outline" onclick="setSearchAndRun('tháng này')">📅 Tháng này</button>
+      <button class="btn btn-outline" onclick="setSearchAndRun('tháng trước')">📆 Tháng trước</button>
     </div>
-    <div class="chat-row">
-      <input class="chat-in" id="chatIn" placeholder="Hỏi về tài chính..." onkeydown="if(event.key==='Enter')sendChat()"/>
-      <button class="btn btn-primary" onclick="sendChat()">➤</button>
-    </div>
+    <div id="searchResults" style="margin-top:10px"></div>
   </div>
 
   <div class="card">
@@ -314,29 +313,38 @@ textarea{resize:vertical;min-height:68px}
     <div class="card-title">🔑 Cấu Hình API
       <span class="cfg-status no" id="cfgStatus">❌ Chưa cấu hình</span>
     </div>
-    <div class="cfg-field">
-      <label>📊 Google Sheet ID <a href="https://docs.google.com/spreadsheets" target="_blank" style="font-size:11px;color:var(--acc)">(Mở Sheet)</a></label>
-      <input type="text" id="cfgSheetId" placeholder="Dán Sheet ID vào đây..."/>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Lấy từ URL: docs.google.com/spreadsheets/d/<b>[ID NÀY]</b>/edit</div>
+
+    <!-- Trạng thái đã lưu (hiển thị khi đã cấu hình) -->
+    <div id="cfgSavedPanel" style="display:none;background:#f0fdf4;border:1.5px solid var(--thu);border-radius:11px;padding:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--thu-d);margin-bottom:10px">✅ Đã lưu trên server — không cần nhập lại</div>
+      <div id="cfgSavedList" style="display:flex;flex-direction:column;gap:7px;font-size:13px"></div>
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%" onclick="toggleCfgForm()">✏️ Chỉnh sửa / Cập nhật</button>
     </div>
-    <div class="cfg-field">
-      <label>🤖 Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px;color:var(--acc)">(Lấy Key)</a></label>
-      <input type="password" id="cfgGemini" placeholder="AIza..."/>
+
+    <!-- Form nhập (ẩn khi đã có đủ config) -->
+    <div id="cfgForm">
+      <div class="cfg-field">
+        <label>📊 Google Sheet ID <a href="https://docs.google.com/spreadsheets" target="_blank" style="font-size:11px;color:var(--acc)">(Mở Sheet)</a></label>
+        <input type="text" id="cfgSheetId" placeholder="Dán Sheet ID vào đây..."/>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Lấy từ URL: docs.google.com/spreadsheets/d/<b>[ID NÀY]</b>/edit</div>
+      </div>
+      <div class="cfg-field">
+        <label>🤖 Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px;color:var(--acc)">(Lấy Key)</a></label>
+        <input type="password" id="cfgGemini" placeholder="AIza..."/>
+      </div>
+      <div class="cfg-field">
+        <label>📱 Telegram Bot Token (tùy chọn)</label>
+        <input type="password" id="cfgTgToken" placeholder="1234567890:AAF..."/>
+      </div>
+      <div class="cfg-field">
+        <label>📱 Telegram Chat ID (tùy chọn)</label>
+        <input type="text" id="cfgTgChat" placeholder="-100123456789"/>
+      </div>
+      <button class="btn btn-primary btn-full" id="saveCfgBtn" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
     </div>
-    <div class="cfg-field">
-      <label>📱 Telegram Bot Token (tùy chọn)</label>
-      <input type="password" id="cfgTgToken" placeholder="1234567890:AAF..."/>
-    </div>
-    <div class="cfg-field">
-      <label>📱 Telegram Chat ID (tùy chọn)</label>
-      <input type="text" id="cfgTgChat" placeholder="-100123456789"/>
-    </div>
-    <button class="btn btn-primary btn-full" id="saveCfgBtn" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
-    <div style="margin-top:10px">
-      <button class="btn btn-outline btn-full btn-sm" onclick="runDiagnostic()">🔬 Chẩn đoán kết nối chi tiết</button>
-    </div>
+
     <div style="margin-top:10px;padding:12px;background:#f8fafc;border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7">
-      🔒 <b>Bảo mật:</b> API key được lưu trong Google Apps Script Properties (mã hóa phía server), <b>không lộ ra ngoài URL hay code</b>.
+      🔒 <b>Bảo mật:</b> API key được lưu trong Google Apps Script Properties (phía server), <b>không lộ ra ngoài</b>. Mọi thiết bị truy cập đều dùng chung cấu hình này.
     </div>
   </div>
 
@@ -351,8 +359,7 @@ textarea{resize:vertical;min-height:68px}
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button class="btn btn-success" style="flex:2" onclick="saveGasUrl()">✅ Lưu URL</button>
       <button class="btn btn-primary" style="flex:1" onclick="runDiagnostic()">🔬 Chẩn đoán</button>
-    </div>
-    <!-- DIAGNOSTIC PANEL -->
+    </div>    <!-- DIAGNOSTIC PANEL -->
     <div id="diagPanel" style="display:none;background:#0f172a;border-radius:12px;padding:14px;font-family:monospace;font-size:12px;line-height:1.9">
       <div style="color:#94a3b8;margin-bottom:8px;font-size:11px;font-family:sans-serif;font-weight:700">📋 KẾT QUẢ CHẨN ĐOÁN</div>
       <div id="diagLog"></div>
@@ -439,6 +446,8 @@ window.onload = () => {
 
   loadPrefs();
   setNow();
+  setConnStatus(GAS_URL ? 'checking' : 'error');
+
   if (GAS_URL) {
     document.getElementById('cfgGasUrl').value = GAS_URL;
     _syncGasUrlInput();
@@ -446,6 +455,7 @@ window.onload = () => {
     loadSummary();
   } else {
     showSetupBanner(true);
+    setConnStatus('error');
   }
 };
 
@@ -472,6 +482,7 @@ function saveGasUrl() {
   GAS_URL = url;
   localStorage.setItem('gasUrl', url);
   toast('✅ Đã lưu URL GAS!', 'ok');
+  setConnStatus('checking');
   checkConfig();
   loadSummary();
   showSetupBanner(false);
@@ -513,22 +524,75 @@ async function saveConfig() {
   btn.disabled = false;
 }
 
+// ================================================================
+//  TRẠNG THÁI KẾT NỐI
+// ================================================================
+function setConnStatus(state) {
+  // state: 'checking' | 'ok' | 'error'
+  const dot  = document.getElementById('connDotIcon');
+  const text = document.getElementById('connDotText');
+  if (state === 'ok') {
+    dot.style.background  = '#4ade80';
+    text.textContent      = 'Đã kết nối';
+  } else if (state === 'error') {
+    dot.style.background  = '#f87171';
+    text.textContent      = 'Chưa kết nối';
+  } else {
+    dot.style.background  = '#fbbf24';
+    text.textContent      = 'Đang kiểm tra...';
+  }
+}
+
+function toggleCfgForm() {
+  const form  = document.getElementById('cfgForm');
+  const panel = document.getElementById('cfgSavedPanel');
+  const showing = form.style.display !== 'none';
+  form.style.display  = showing ? 'none' : '';
+  panel.style.display = showing ? ''     : 'none';
+}
+
 async function checkConfig() {
-  if (!GAS_URL) return;
+  if (!GAS_URL) { setConnStatus('error'); return; }
+  setConnStatus('checking');
   try {
     const r = await gasGet('getConfig');
     const el = document.getElementById('cfgStatus');
+
     if (r.configured) {
-      el.textContent = '✅ Đã cấu hình';
-      el.className = 'cfg-status ok';
+      // Hiện panel "đã lưu"
+      el.textContent  = '✅ Đã cấu hình';
+      el.className    = 'cfg-status ok';
       showSetupBanner(false);
-      if (r.hasSheetId) document.getElementById('cfgSheetId').placeholder = '(Đã lưu — nhập mới để thay đổi)';
+      setConnStatus('ok');
+
+      // Hiển thị chi tiết những gì đã lưu
+      const list = document.getElementById('cfgSavedList');
+      list.innerHTML = [
+        { icon:'📊', label:'Google Sheet ID',  saved: r.hasSheetId   },
+        { icon:'🤖', label:'Gemini API Key',   saved: r.hasGeminiKey },
+        { icon:'📱', label:'Telegram',         saved: r.hasTelegram, optional: true }
+      ].map(item => `
+        <div style="display:flex;align-items:center;gap:8px">
+          <span>${item.saved ? '✅' : (item.optional ? '⬜' : '❌')}</span>
+          <span style="color:${item.saved ? 'var(--thu-d)' : (item.optional ? 'var(--muted)' : 'var(--chi-d)')}">
+            ${item.icon} ${item.label}: <b>${item.saved ? 'Đã lưu' : (item.optional ? 'Chưa cài (tùy chọn)' : 'CHƯA LƯU')}</b>
+          </span>
+        </div>`).join('');
+
+      document.getElementById('cfgSavedPanel').style.display = '';
+      document.getElementById('cfgForm').style.display = 'none';
+
     } else {
       el.textContent = '❌ Chưa đủ';
-      el.className = 'cfg-status no';
+      el.className   = 'cfg-status no';
       showSetupBanner(true);
+      setConnStatus('error');
+      document.getElementById('cfgSavedPanel').style.display = 'none';
+      document.getElementById('cfgForm').style.display = '';
     }
-  } catch(e) {}
+  } catch(e) {
+    setConnStatus('error');
+  }
 }
 
 async function testConn() {
@@ -979,33 +1043,49 @@ async function loadReport() {
   } catch(e) {}
 }
 
-function quickAsk(q) {
-  document.getElementById('chatIn').value = q;
-  sendChat();
+// ================================================================
+//  TÌM KIẾM GIAO DỊCH
+// ================================================================
+function setSearchAndRun(keyword) {
+  document.getElementById('searchIn').value = keyword;
+  doSearch();
 }
 
-async function sendChat() {
-  const q = document.getElementById('chatIn').value.trim();
-  if (!q) return;
+async function doSearch() {
+  const keyword = document.getElementById('searchIn').value.trim();
+  if (!keyword) return;
   if (!GAS_URL) { toast('Chưa cấu hình URL GAS', 'warn'); return; }
-  document.getElementById('chatIn').value = '';
 
-  const box = document.getElementById('chatBox');
-  box.innerHTML += `<div class="cmsg user"><div class="cbub">${q}</div></div>`;
-  box.innerHTML += `<div class="cmsg bot" id="chatLoader"><div style="font-size:24px">🤖</div><div class="cbub">⏳ Đang phân tích...</div></div>`;
-  box.scrollTop = box.scrollHeight;
+  const box = document.getElementById('searchResults');
+  box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">⏳ Đang tìm...</div>';
 
   try {
-    const r = await api('askReport', { question: q });
-    document.getElementById('chatLoader')?.remove();
-    const ans = r.success ? r.answer.replace(/\n/g,'<br>') : ('❌ ' + r.message);
-    box.innerHTML += `<div class="cmsg bot"><div style="font-size:24px">🤖</div><div class="cbub">${ans}</div></div>`;
-    if (r.success && prefs.voice) speak(r.answer);
+    const r = await api('searchTransactions', { keyword });
+    if (!r.success) {
+      box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ ${r.message}</div>`;
+      return;
+    }
+    const items = r.results;
+    if (!items || items.length === 0) {
+      box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">Không tìm thấy giao dịch nào</div>';
+      return;
+    }
+    box.innerHTML = `
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Tìm thấy <b>${items.length}</b> giao dịch</div>
+      <div class="rlist">
+        ${items.map(item => `
+          <div class="ritem">
+            <div class="rico ${item.type}">${item.type==='thu'?'💰':'💸'}</div>
+            <div class="rinfo">
+              <div class="rname">${item.tenDoiTuong || '—'}</div>
+              <div class="rdesc">${item.noiDung || '—'} · ${item.ngay || ''}</div>
+            </div>
+            <div class="ramt ${item.type}">${Number(item.soTien||0).toLocaleString('vi-VN')}₫</div>
+          </div>`).join('')}
+      </div>`;
   } catch(e) {
-    document.getElementById('chatLoader')?.remove();
-    box.innerHTML += `<div class="cmsg bot"><div style="font-size:24px">🤖</div><div class="cbub">❌ Lỗi kết nối</div></div>`;
+    box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ Lỗi: ${e.message}</div>`;
   }
-  box.scrollTop = box.scrollHeight;
 }
 
 // ================================================================
