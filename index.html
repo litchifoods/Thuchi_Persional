@@ -133,7 +133,7 @@ textarea{resize:vertical;min-height:68px}
 .cfg-status.no{background:#fee2e2;color:var(--chi-d)}
 
 /* RECENT */
-.rlist{display:flex;flex-direction:column;gap:8px}
+.rlist{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px}
 .ritem{display:flex;align-items:center;gap:11px;padding:11px;background:var(--bg);border-radius:11px;border:1px solid var(--border)}
 .rico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .rico.thu{background:var(--thu-l)}
@@ -259,7 +259,7 @@ textarea{resize:vertical;min-height:68px}
       </div>
       <div class="fg" id="fAddrWrap">
         <label>📍 Địa chỉ</label>
-        <input type="text" id="fAddr" placeholder="Quang Trung..."/>
+        <input type="text" id="fAddr" placeholder="Quang Trung..." autocomplete="off" autocorrect="off" autocapitalize="off"/>
       </div>
     </div>
     <div class="fg">
@@ -272,7 +272,10 @@ textarea{resize:vertical;min-height:68px}
   <!-- RECENT -->
   <div class="card">
     <div class="card-title">🕐 Giao Dịch Gần Đây
-      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="loadSummary()">🔄</button>
+      <div style="display:flex;gap:6px;margin-left:auto">
+        <button class="btn btn-outline btn-sm" onclick="openGoogleSheet()" title="Mở Google Sheet">📊</button>
+        <button class="btn btn-outline btn-sm" onclick="loadSummary()" title="Tải lại">🔄</button>
+      </div>
     </div>
     <div class="rlist" id="recentList"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Đang tải...</div></div>
   </div>
@@ -313,6 +316,9 @@ textarea{resize:vertical;min-height:68px}
     <div class="card-title">🔑 Cấu Hình API
       <span class="cfg-status no" id="cfgStatus">❌ Chưa cấu hình</span>
     </div>
+    <button class="btn btn-outline btn-full" onclick="openGoogleSheet()" style="margin-bottom:12px;font-size:13px;">
+      📊 Mở Google Sheet để kiểm tra dữ liệu
+    </button>
 
     <!-- Trạng thái đã lưu (hiển thị khi đã cấu hình) -->
     <div id="cfgSavedPanel" style="display:none;background:#f0fdf4;border:1.5px solid var(--thu);border-radius:11px;padding:14px;margin-bottom:14px">
@@ -509,6 +515,8 @@ async function saveConfig() {
   btn.innerHTML = '<span class="spin"></span> Đang lưu...';
   btn.disabled = true;
   try {
+    // Cache sheet ID locally để dùng cho nút mở sheet
+    if (config.sheetId) localStorage.setItem('cached_sheetId', config.sheetId);
     const r = await api('saveConfig', { config });
     toast(r.message || (r.success ? '✅ Đã lưu!' : '❌ Lỗi'), r.success ? 'ok' : 'err');
     if (r.success) {
@@ -942,12 +950,15 @@ async function doSave(data) {
       toast(r.message, 'ok');
       if (prefs.voice) speak(r.message);
       resetForms();
-      loadSummary();
+      setTimeout(() => loadSummary(), 1200); // Chờ GAS lưu xong rồi tải lại
     } else {
-      toast(r.message || 'Lỗi lưu', 'err');
+      // Hiện lỗi chi tiết từ GAS
+      toast('❌ ' + (r.message || 'Lỗi không xác định'), 'err');
+      console.error('[doSave] GAS lỗi:', r);
     }
   } catch(e) {
-    toast('Lỗi kết nối: ' + e.message, 'err');
+    toast('❌ Kết nối thất bại: ' + e.message, 'err');
+    console.error('[doSave] fetch lỗi:', e);
   }
 }
 
@@ -980,7 +991,7 @@ async function loadSummary() {
     const items = [
       ...r.recentThu.map(x => ({ row: x, t: 'thu' })),
       ...r.recentChi.map(x => ({ row: x, t: 'chi' }))
-    ].sort((a,b) => new Date(b.row[1]) - new Date(a.row[1])).slice(0, 8);
+    ].sort((a,b) => new Date(b.row[1]) - new Date(a.row[1])).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
@@ -1125,6 +1136,18 @@ function getHttpHint(status) {
 // ================================================================
 //  SPEAK
 // ================================================================
+function openGoogleSheet() {
+  // Lấy Sheet ID từ localStorage (đã lưu qua saveConfig)
+  const sheetId = localStorage.getItem('cached_sheetId') || '';
+  if (sheetId) {
+    window.open('https://docs.google.com/spreadsheets/d/' + sheetId + '/edit', '_blank');
+  } else {
+    // Thử mở trang Google Sheets chung
+    window.open('https://docs.google.com/spreadsheets', '_blank');
+    toast('💡 Mẹo: Lưu Sheet ID trong Cài đặt để mở trực tiếp!', 'warn');
+  }
+}
+
 function speak(text) {
   if (!prefs.voice || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
