@@ -300,6 +300,9 @@ textarea{resize:vertical;min-height:66px}
     </label>
     <button class="login-btn" onclick="doLogin()">🔓 Đăng nhập</button>
     <div class="login-err" id="loginErr"></div>
+    <div style="margin-top:12px">
+      <button onclick="showForgotPassword()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;text-decoration:underline">Quên mật khẩu?</button>
+    </div>
     <div class="login-version">v2.0 • Bảo mật bằng mật khẩu</div>
   </div>
 </div>
@@ -620,7 +623,7 @@ async function changePassword() {
     const r = await api('changePassword', { oldHash, newHash });
     if (r.success) {
       toast(r.message, 'ok');
-      localStorage.removeItem('tc_remember_until'); // Yêu cầu đăng nhập lại bằng mật khẩu mới
+      localStorage.removeItem('tc_remember_until');
       document.getElementById('pwdOld').value = '';
       document.getElementById('pwdNew').value = '';
       document.getElementById('pwdConfirm').value = '';
@@ -628,6 +631,48 @@ async function changePassword() {
       toast(r.message || 'Lỗi đổi mật khẩu', 'err');
     }
   } catch(e) { toast('Lỗi kết nối', 'err'); }
+}
+
+// ================================================================
+//  QUÊN MẬT KHẨU — dùng resetToken từ Apps Script Properties
+// ================================================================
+function showForgotPassword() {
+  const token = prompt(
+    '🔑 HƯỚNG DẪN LẤY LẠI MẬT KHẨU:\n\n' +
+    '1. Vào script.google.com → mở project GAS\n' +
+    '2. Vào ⚙️ Project Settings → Script Properties\n' +
+    '3. Thêm property: resetToken = (tự đặt 1 chuỗi bất kỳ, VD: "reset123")\n' +
+    '4. Nhấn Save\n' +
+    '5. Nhập đúng chuỗi đó vào ô bên dưới:\n\n' +
+    'Nhập resetToken của bạn:'
+  );
+  if (!token) return;
+  resetPasswordWithToken(token.trim());
+}
+
+async function resetPasswordWithToken(token) {
+  const gasUrl = resolveGasUrl() || localStorage.getItem('gasUrl');
+  if (!gasUrl) {
+    alert('Chưa có URL GAS. Hãy nhập URL GAS vào ô bên dưới màn hình đăng nhập trước.');
+    return;
+  }
+  try {
+    const res = await fetch(gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'resetPassword', token }),
+      redirect: 'follow'
+    });
+    const r = await res.json();
+    if (r.success) {
+      alert('✅ ' + r.message + '\n\nMật khẩu đã được reset về "1234".\nHãy đăng nhập và đổi mật khẩu mới ngay!');
+      location.reload();
+    } else {
+      alert('❌ ' + r.message);
+    }
+  } catch(e) {
+    alert('Lỗi kết nối: ' + e.message);
+  }
 }
 
 function doLogout() {
@@ -971,13 +1016,17 @@ async function loadSummary() {
     const tsEl = document.getElementById('syncTimestamp');
     if (tsEl && r.lastModified) tsEl.textContent = 'Đồng bộ lúc ' + r.lastModified;
 
-    // Gộp thu + chi, sắp xếp theo ngày mới nhất
+    // Gộp thu + chi, sắp xếp theo ngày+giờ mới nhất lên trên
     const items = [
       ...(r.recentThu||[]),
       ...(r.recentChi||[])
     ].sort((a,b) => {
-      // Parse DD/MM/YYYY HH:MM
-      const parseVN = s => { if(!s)return 0; const p=s.match(/(\d+)\/(\d+)\/(\d+)/); return p?new Date(p[3],p[2]-1,p[1]).getTime():0; };
+      // Parse DD/MM/YYYY HH:MM — lấy cả giờ để sort chính xác
+      const parseVN = s => {
+        if (!s) return 0;
+        const p = s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);
+        return p ? new Date(p[3], p[2]-1, p[1], p[4]||0, p[5]||0).getTime() : 0;
+      };
       return parseVN(b.ngay) - parseVN(a.ngay);
     }).slice(0, 10);
 
