@@ -386,6 +386,7 @@ textarea{resize:vertical;min-height:66px}
         <button class="btn btn-outline btn-sm" onclick="loadSummary()" title="Tải lại">🔄</button>
       </div>
     </div>
+    <div id="syncTimestamp" style="font-size:11px;color:var(--muted);margin-bottom:8px;text-align:right"></div>
     <div class="rlist" id="recentList">
       <div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Đang tải...</div>
     </div>
@@ -492,6 +493,12 @@ textarea{resize:vertical;min-height:66px}
   <!-- ĐỔI MẬT KHẨU -->
   <div class="card">
     <div class="card-title">🔒 Bảo Mật & Mật Khẩu</div>
+    <!-- Thông tin mật khẩu server -->
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#166534;line-height:1.7">
+      🔐 <b>Mật khẩu lưu trên Google Apps Script server</b> — dùng chung cho mọi thiết bị, mọi trình duyệt.<br>
+      📌 Mật khẩu mặc định: <b>1234</b><br>
+      💡 Đổi mật khẩu bên dưới sẽ có hiệu lực ngay với tất cả thiết bị.
+    </div>
     <div class="pwd-section">
       <h4>Đổi Mật Khẩu</h4>
       <div class="cfg-field"><label>Mật khẩu hiện tại</label><input type="password" id="pwdOld" placeholder="Nhập mật khẩu hiện tại"/></div>
@@ -535,52 +542,60 @@ textarea{resize:vertical;min-height:66px}
 
 <script>
 // ================================================================
-//  PASSWORD SYSTEM
+//  PASSWORD SYSTEM — mật khẩu lưu trên GAS server (dùng chung mọi thiết bị)
 // ================================================================
-const DEFAULT_PWD_HASH = 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'; // SHA-256 of "123"
-
 async function sha256(str) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
 async function initAuth() {
-  const hash = localStorage.getItem('tc_pwdhash');
-  if (!hash) {
-    // Lần đầu dùng: đặt mật khẩu mặc định "1234"
-    localStorage.setItem('tc_pwdhash', await sha256('1234'));
-    document.getElementById('loginSubtitle').textContent = 'Mật khẩu mặc định: 1234 (đổi ngay trong Cài đặt)';
-  }
-  // Kiểm tra "ghi nhớ"
-  const until = localStorage.getItem('tc_remember_until');
-  if (until && Date.now() < Number(until)) {
-    unlock(); return;
-  }
   // Kiểm tra session (tab hiện tại)
-  if (sessionStorage.getItem('tc_unlocked') === '1') {
-    unlock(); return;
-  }
+  if (sessionStorage.getItem('tc_unlocked') === '1') { unlock(); return; }
+  // Kiểm tra "ghi nhớ" trên thiết bị này
+  const until = localStorage.getItem('tc_remember_until');
+  if (until && Date.now() < Number(until)) { unlock(); return; }
+  // Chưa có session → hiện màn hình đăng nhập
+  document.getElementById('loginSubtitle').textContent = 'Nhập mật khẩu để tiếp tục';
   document.getElementById('loginOverlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('loginPwd').focus(), 100);
 }
 
 async function doLogin() {
-  const pwd  = document.getElementById('loginPwd').value;
-  const hash = localStorage.getItem('tc_pwdhash') || (await sha256('1234'));
-  const input_hash = await sha256(pwd);
-  if (input_hash !== hash) {
-    document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng, thử lại!';
-    document.getElementById('loginPwd').value = '';
-    document.getElementById('loginPwd').focus();
-    return;
+  const pwd = document.getElementById('loginPwd').value.trim();
+  if (!pwd) return;
+  const gasUrl = resolveGasUrl();
+  if (!gasUrl) {
+    // Nếu chưa có GAS URL → tạm thời dùng mật khẩu cục bộ "1234" để vào cài đặt
+    const h = await sha256(pwd);
+    const DEFAULT = await sha256('1234');
+    if (h !== DEFAULT) {
+      document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng (mặc định: 1234)';
+      document.getElementById('loginPwd').value = ''; document.getElementById('loginPwd').focus(); return;
+    }
+    _finishLogin(); return;
   }
+  // Gọi GAS kiểm tra mật khẩu
+  document.getElementById('loginErr').textContent = '⏳ Đang xác thực...';
+  try {
+    const hash = await sha256(pwd);
+    const r = await fetch(`${gasUrl}?action=checkPassword&hash=${encodeURIComponent(hash)}`);
+    const data = await r.json();
+    if (data.success) { _finishLogin(); }
+    else {
+      document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng, thử lại!';
+      document.getElementById('loginPwd').value = ''; document.getElementById('loginPwd').focus();
+    }
+  } catch(e) {
+    document.getElementById('loginErr').textContent = '❌ Lỗi kết nối, thử lại!';
+  }
+}
+
+function _finishLogin() {
   document.getElementById('loginErr').textContent = '';
   const remember = document.getElementById('rememberMe').checked;
-  if (remember) {
-    localStorage.setItem('tc_remember_until', Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 ngày
-  } else {
-    localStorage.removeItem('tc_remember_until');
-  }
+  if (remember) localStorage.setItem('tc_remember_until', Date.now() + 30*24*60*60*1000);
+  else localStorage.removeItem('tc_remember_until');
   sessionStorage.setItem('tc_unlocked', '1');
   unlock();
 }
@@ -597,15 +612,22 @@ async function changePassword() {
   if (!oldPwd || !newPwd || !confirm) { toast('Vui lòng điền đủ 3 ô', 'warn'); return; }
   if (newPwd.length < 4) { toast('Mật khẩu mới cần ít nhất 4 ký tự', 'warn'); return; }
   if (newPwd !== confirm) { toast('Mật khẩu mới không khớp', 'err'); return; }
-  const curHash  = localStorage.getItem('tc_pwdhash');
-  const oldHash  = await sha256(oldPwd);
-  if (oldHash !== curHash) { toast('Mật khẩu hiện tại không đúng', 'err'); return; }
-  localStorage.setItem('tc_pwdhash', await sha256(newPwd));
-  localStorage.setItem('tc_remember_until', Date.now() + 30 * 24 * 60 * 60 * 1000);
-  document.getElementById('pwdOld').value = '';
-  document.getElementById('pwdNew').value = '';
-  document.getElementById('pwdConfirm').value = '';
-  toast('✅ Đã đổi mật khẩu thành công!', 'ok');
+  const gasUrl = resolveGasUrl();
+  if (!gasUrl) { toast('Chưa có URL GAS, không thể đổi mật khẩu server', 'warn'); return; }
+  try {
+    const oldHash = await sha256(oldPwd);
+    const newHash = await sha256(newPwd);
+    const r = await api('changePassword', { oldHash, newHash });
+    if (r.success) {
+      toast(r.message, 'ok');
+      localStorage.removeItem('tc_remember_until'); // Yêu cầu đăng nhập lại bằng mật khẩu mới
+      document.getElementById('pwdOld').value = '';
+      document.getElementById('pwdNew').value = '';
+      document.getElementById('pwdConfirm').value = '';
+    } else {
+      toast(r.message || 'Lỗi đổi mật khẩu', 'err');
+    }
+  } catch(e) { toast('Lỗi kết nối', 'err'); }
 }
 
 function doLogout() {
@@ -632,6 +654,8 @@ let prefs     = { voice: true, telegram: false, autoSave: false };
 // ================================================================
 //  APP INIT (chạy sau khi login xong)
 // ================================================================
+let _autoRefreshTimer = null;
+
 function appInit() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
   GAS_URL = resolveGasUrl();
@@ -642,6 +666,11 @@ function appInit() {
     document.getElementById('cfgGasUrl').value = GAS_URL;
     checkConfig();
     loadSummary();
+    // Tự động làm mới dữ liệu mỗi 60 giây — đồng bộ thay đổi từ Google Sheet
+    if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+    _autoRefreshTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') loadSummary();
+    }, 60000);
   } else {
     showSetupBanner(true);
     setConnStatus('error');
@@ -938,23 +967,33 @@ async function loadSummary() {
     loiEl.textContent = fmt(r.loiNhuan);
     loiEl.style.color = (r.loiNhuan||0) >= 0 ? 'var(--thu-d)' : 'var(--chi-d)';
 
+    // Hiển thị thời điểm đồng bộ cuối
+    const tsEl = document.getElementById('syncTimestamp');
+    if (tsEl && r.lastModified) tsEl.textContent = 'Đồng bộ lúc ' + r.lastModified;
+
+    // Gộp thu + chi, sắp xếp theo ngày mới nhất
     const items = [
-      ...( r.recentThu||[]).map(x => ({ row: x, t: 'thu' })),
-      ...( r.recentChi||[]).map(x => ({ row: x, t: 'chi' }))
-    ].sort((a,b) => new Date(b.row[1]) - new Date(a.row[1])).slice(0, 10);
+      ...(r.recentThu||[]),
+      ...(r.recentChi||[])
+    ].sort((a,b) => {
+      // Parse DD/MM/YYYY HH:MM
+      const parseVN = s => { if(!s)return 0; const p=s.match(/(\d+)\/(\d+)\/(\d+)/); return p?new Date(p[3],p[2]-1,p[1]).getTime():0; };
+      return parseVN(b.ngay) - parseVN(a.ngay);
+    }).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
       list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có giao dịch</div>'; return;
     }
-    list.innerHTML = items.map(({ row, t }) => `
+    // Dùng field name (noiDung, tenDoiTuong) thay vì array index — tránh sai cột
+    list.innerHTML = items.map(item => `
       <div class="ritem">
-        <div class="rico ${t}">${t==='thu'?'💰':'💸'}</div>
+        <div class="rico ${item.type}">${item.type==='thu'?'💰':'💸'}</div>
         <div class="rinfo">
-          <div class="rname">${row[3] || '—'}</div>
-          <div class="rdesc">${row[t==='thu'?5:4] || '—'}</div>
+          <div class="rname">${item.tenDoiTuong || '—'}</div>
+          <div class="rdesc">${item.noiDung || '—'} <span style="color:var(--muted);font-size:10px">${item.ngay||''}</span></div>
         </div>
-        <div class="ramt ${t}">${(Number(row[2])||0).toLocaleString('vi-VN')}₫</div>
+        <div class="ramt ${item.type}">${(item.soTien||0).toLocaleString('vi-VN')}₫</div>
       </div>`).join('');
   } catch(e) {}
 }
