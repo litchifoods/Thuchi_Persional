@@ -5,137 +5,227 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>💰 Thu Chi Cá Nhân</title>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#6366f1"/>
+<meta name="theme-color" content="#0f172a"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="ThuChi"/>
-<!-- Đọc cấu hình từ config.js (GAS URL, tên app) -->
 <script src="config.js"></script>
 <style>
+/* ══════════════════════════════════════════════
+   LUXURY THEME – Deep Navy + Gold
+═══════════════════════════════════════════════ */
 :root{
-  --thu:#10b981;--thu-l:#d1fae5;--thu-d:#059669;
-  --chi:#ef4444;--chi-l:#fee2e2;--chi-d:#dc2626;
-  --acc:#6366f1;--acc-l:#ede9fe;--acc-d:#4f46e5;
-  --bg:#f1f5f9;--card:#fff;--border:#e2e8f0;
-  --text:#1e293b;--muted:#64748b;
-  --shadow:0 2px 16px rgba(0,0,0,0.08);
+  --navy:#0f172a;    --navy2:#1e293b;   --navy3:#334155;
+  --gold:#f59e0b;    --gold-l:#fef3c7;  --gold-d:#d97706;
+  --thu:#10b981;     --thu-l:#d1fae5;   --thu-d:#059669;
+  --chi:#f43f5e;     --chi-l:#ffe4e6;   --chi-d:#e11d48;
+  --acc:#6366f1;     --acc-l:#ede9fe;   --acc-d:#4f46e5;
+  --bg:#f1f5f9;      --card:#ffffff;    --border:#e2e8f0;
+  --text:#0f172a;    --muted:#64748b;
+  --shadow:0 4px 24px rgba(15,23,42,0.10);
   --r:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
 
-/* NAV */
-nav{background:linear-gradient(135deg,#6366f1,#8b5cf6);position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(99,102,241,.4)}
+/* ══ LOGIN OVERLAY ══ */
+#loginOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+#loginOverlay.hidden{display:none}
+.login-box{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);
+  backdrop-filter:blur(20px);border-radius:24px;padding:36px 28px;
+  width:100%;max-width:380px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,0.5);
+}
+.login-logo{font-size:48px;margin-bottom:8px}
+.login-title{color:#fff;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.login-sub{color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:28px}
+.login-input{
+  width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.08);color:#fff;font-size:16px;font-family:inherit;
+  text-align:center;letter-spacing:3px;outline:none;transition:.2s;
+}
+.login-input::placeholder{color:rgba(255,255,255,0.3);letter-spacing:0}
+.login-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.12)}
+.login-remember{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 0;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer}
+.login-remember input{width:16px;height:16px;accent-color:var(--gold)}
+.login-btn{
+  width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-size:15px;
+  font-weight:700;font-family:inherit;transition:.2s;margin-top:4px;
+  background:linear-gradient(135deg,var(--gold),#d97706);color:#0f172a;
+  box-shadow:0 4px 20px rgba(245,158,11,0.35);
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,158,11,0.45)}
+.login-btn:active{transform:translateY(0)}
+.login-err{color:#f87171;font-size:12px;margin-top:10px;min-height:18px}
+.login-version{color:rgba(255,255,255,0.2);font-size:11px;margin-top:20px}
+
+/* ══ NAV ══ */
+nav{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 20px rgba(15,23,42,0.35);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-.nav-logo{color:#fff;font-size:17px;font-weight:800;letter-spacing:-.3px}
+.nav-logo{
+  color:#fff;font-size:16px;font-weight:800;letter-spacing:-.3px;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo-icon{
+  width:32px;height:32px;border-radius:9px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.nav-conn{
+  display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
+  padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.1);color:#fff;
+}
 .nav-tabs{display:flex;gap:4px}
-.tab-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 12px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;transition:.2s}
-.tab-btn.active{background:#fff;color:var(--acc)}
+.tab-btn{
+  background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);
+  padding:7px 12px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;transition:.2s;
+}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--navy);font-weight:800}
 
-/* SETUP BANNER */
-.setup-banner{background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:var(--r);padding:16px;margin:16px;display:flex;align-items:flex-start;gap:12px}
+/* ══ SETUP BANNER ══ */
+.setup-banner{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  border:2px solid var(--gold);border-radius:var(--r);
+  padding:16px;margin:16px;display:flex;align-items:flex-start;gap:12px;
+}
 .setup-banner.hidden{display:none}
-.setup-icon{font-size:28px;flex-shrink:0}
-.setup-text h3{font-size:15px;font-weight:700;color:#92400e}
-.setup-text p{font-size:13px;color:#78350f;margin-top:4px}
-.setup-text .btn-setup{margin-top:10px;background:#f59e0b;color:#fff;border:none;padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px}
+.setup-banner h3{font-size:14px;font-weight:700;color:#92400e}
+.setup-banner p{font-size:12px;color:#78350f;margin-top:3px}
+.setup-banner .btn-setup{
+  margin-top:8px;background:var(--gold-d);color:#fff;border:none;
+  padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;
+}
 
-/* MAIN */
-.main{max-width:660px;margin:0 auto;padding:16px}
+/* ══ MAIN ══ */
+.main{max-width:660px;margin:0 auto;padding:14px}
 
-/* CARD */
-.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:14px;border:1px solid var(--border)}
-.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+/* ══ CARD ══ */
+.card{
+  background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:18px;margin-bottom:14px;border:1px solid var(--border);
+}
+.card-title{font-size:13px;font-weight:700;color:var(--navy2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
-/* SUMMARY */
+/* ══ SUMMARY CARDS ══ */
 .sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.sum-card{border-radius:12px;padding:14px 10px;text-align:center}
-.sum-card.thu{background:var(--thu-l);border:1.5px solid var(--thu)}
-.sum-card.chi{background:var(--chi-l);border:1.5px solid var(--chi)}
-.sum-card.loi{background:var(--acc-l);border:1.5px solid var(--acc)}
-.sum-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-.sum-val{font-size:13px;font-weight:800;margin-top:3px;word-break:break-all}
+.sum-card{border-radius:12px;padding:14px 10px;text-align:center;position:relative;overflow:hidden}
+.sum-card::before{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.08}
+.sum-card.thu{background:linear-gradient(135deg,#f0fdf4,var(--thu-l));border:1.5px solid var(--thu)}
+.sum-card.thu::before{background:var(--thu)}
+.sum-card.chi{background:linear-gradient(135deg,#fff1f2,var(--chi-l));border:1.5px solid var(--chi)}
+.sum-card.chi::before{background:var(--chi)}
+.sum-card.loi{background:linear-gradient(135deg,#fefce8,var(--gold-l));border:1.5px solid var(--gold)}
+.sum-card.loi::before{background:var(--gold)}
+.sum-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.sum-val{font-size:14px;font-weight:800;margin-top:4px;word-break:break-all}
 .sum-card.thu .sum-val{color:var(--thu-d)}
 .sum-card.chi .sum-val{color:var(--chi-d)}
-.sum-card.loi .sum-val{color:var(--acc-d)}
+.sum-card.loi .sum-val{color:var(--gold-d)}
 
-/* VOICE */
-.voice-wrap{text-align:center;padding:4px 0}
-.voice-btn{width:76px;height:76px;border-radius:50%;border:none;cursor:pointer;font-size:30px;background:linear-gradient(135deg,var(--acc),#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.35);transition:.2s;display:inline-flex;align-items:center;justify-content:center}
-.voice-btn.rec{background:linear-gradient(135deg,var(--chi),#f97316);animation:pulse 1s infinite}
-.voice-btn:hover{transform:scale(1.06)}
-@keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(239,68,68,.3)}50%{box-shadow:0 4px 40px rgba(239,68,68,.7)}}
-.voice-hint{font-size:12px;color:var(--muted);margin-top:7px}
-.voice-text{background:#f8fafc;border-radius:10px;padding:12px;margin-top:10px;font-size:13px;color:var(--text);min-height:44px;font-style:italic;line-height:1.5;border:1px solid var(--border)}
+/* ══ VOICE ══ */
+.voice-wrap{text-align:center;padding:6px 0}
+.voice-btn{
+  width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;font-size:32px;
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  color:#fff;box-shadow:0 6px 24px rgba(15,23,42,0.3);transition:.2s;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:2px solid rgba(245,158,11,0.3);
+}
+.voice-btn.rec{background:linear-gradient(135deg,var(--chi),#f97316);animation:pulse 1s infinite;border-color:transparent}
+.voice-btn:hover{transform:scale(1.05)}
+@keyframes pulse{0%,100%{box-shadow:0 6px 24px rgba(239,68,68,.3)}50%{box-shadow:0 6px 40px rgba(239,68,68,.7)}}
+.voice-hint{font-size:12px;color:var(--muted);margin-top:8px}
+.voice-text{
+  background:#f8fafc;border-radius:10px;padding:12px 14px;margin-top:10px;
+  font-size:13px;color:var(--text);min-height:44px;font-style:italic;line-height:1.5;
+  border:1px solid var(--border);
+}
 
-/* TYPE TABS */
+/* ══ TYPE TABS ══ */
 .type-tabs{display:flex;gap:8px;margin-bottom:14px}
-.type-tab{flex:1;padding:10px;border:2px solid var(--border);background:#fff;border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;transition:.2s}
+.type-tab{
+  flex:1;padding:11px;border:2px solid var(--border);background:#fff;
+  border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;transition:.2s;
+}
 .type-tab.thu.on{background:var(--thu-l);border-color:var(--thu);color:var(--thu-d)}
 .type-tab.chi.on{background:var(--chi-l);border-color:var(--chi);color:var(--chi-d)}
 
-/* FORM */
-.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+/* ══ FORM ══ */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .fgrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-input,textarea,select{padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:#fff;font-family:inherit;width:100%;transition:border .2s}
-input:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-textarea{resize:vertical;min-height:68px}
+input,textarea,select{
+  padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;
+  font-size:14px;color:var(--text);background:#fff;font-family:inherit;width:100%;transition:border .2s;
+}
+input:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+textarea{resize:vertical;min-height:66px}
 
-/* BUTTONS */
-.btn{padding:11px 20px;border-radius:11px;border:none;cursor:pointer;font-size:14px;font-weight:700;transition:.2s;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
-.btn-primary{background:linear-gradient(135deg,var(--acc),#8b5cf6);color:#fff;box-shadow:0 3px 12px rgba(99,102,241,.3)}
-.btn-primary:hover{transform:translateY(-1px)}
+/* ══ BUTTONS ══ */
+.btn{
+  padding:11px 20px;border-radius:11px;border:none;cursor:pointer;
+  font-size:14px;font-weight:700;transition:.2s;display:inline-flex;
+  align-items:center;gap:7px;font-family:inherit;
+}
+.btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;box-shadow:0 3px 14px rgba(15,23,42,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(15,23,42,.35)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--navy);font-weight:800}
 .btn-success{background:linear-gradient(135deg,var(--thu),var(--thu-d));color:#fff}
 .btn-danger{background:linear-gradient(135deg,var(--chi),var(--chi-d));color:#fff}
 .btn-outline{background:#fff;border:2px solid var(--border);color:var(--text)}
-.btn-outline:hover{border-color:var(--acc);color:var(--acc)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold-d)}
 .btn-full{width:100%;justify-content:center}
-.btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 .btn-sm{padding:7px 12px;font-size:12px}
 
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0}
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0}
 .overlay.hidden{display:none}
-.modal{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.2);animation:slideUp .25s}
+.modal{
+  background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;
+  max-width:500px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.25);animation:slideUp .25s;
+}
 @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:18px}
 .modal-footer{display:flex;gap:10px;margin-top:18px}
 
-/* CHAT */
-.chat-box{display:flex;flex-direction:column;gap:10px;max-height:380px;overflow-y:auto;padding:4px 2px}
-.cmsg{display:flex;gap:9px}
-.cmsg.user{flex-direction:row-reverse}
-.cbub{max-width:82%;padding:11px 14px;border-radius:14px;font-size:13px;line-height:1.55}
-.cmsg.bot .cbub{background:#f1f5f9;color:var(--text);border-bottom-left-radius:3px}
-.cmsg.user .cbub{background:linear-gradient(135deg,var(--acc),#8b5cf6);color:#fff;border-bottom-right-radius:3px}
-.chat-row{display:flex;gap:8px;margin-top:11px}
-.chat-in{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit}
-.chat-in:focus{outline:none;border-color:var(--acc)}
-
-/* SETTINGS */
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+/* ══ SETTINGS ══ */
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
 .set-row:last-child{border-bottom:none}
-.set-name{font-size:14px;font-weight:600}
-.set-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.set-name{font-size:13px;font-weight:600}
+.set-desc{font-size:11px;color:var(--muted);margin-top:1px}
 .toggle{position:relative;width:46px;height:25px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
 .tslider{position:absolute;inset:0;background:var(--border);border-radius:13px;cursor:pointer;transition:.3s}
 .tslider:before{content:'';position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-.toggle input:checked+.tslider{background:var(--acc)}
+.toggle input:checked+.tslider{background:var(--gold)}
 .toggle input:checked+.tslider:before{transform:translateX(21px)}
 
-/* CONFIG FORM */
+/* ══ CFG ══ */
 .cfg-field{margin-bottom:14px}
-.cfg-field label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
-.cfg-status{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;margin-left:8px}
-.cfg-status.ok{background:#d1fae5;color:var(--thu-d)}
-.cfg-status.no{background:#fee2e2;color:var(--chi-d)}
+.cfg-field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.cfg-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px}
+.cfg-status.ok{background:var(--thu-l);color:var(--thu-d)}
+.cfg-status.no{background:var(--chi-l);color:var(--chi-d)}
 
-/* RECENT */
-.rlist{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px}
-.ritem{display:flex;align-items:center;gap:11px;padding:11px;background:var(--bg);border-radius:11px;border:1px solid var(--border)}
-.rico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+/* ══ RECENT LIST ══ */
+.rlist{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;padding-right:2px}
+.ritem{
+  display:flex;align-items:center;gap:11px;padding:12px;
+  background:var(--bg);border-radius:11px;border:1px solid var(--border);transition:.15s;
+}
+.ritem:hover{border-color:var(--gold-l);background:var(--gold-l)}
+.rico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .rico.thu{background:var(--thu-l)}
 .rico.chi{background:var(--chi-l)}
 .rinfo{flex:1;min-width:0}
@@ -145,51 +235,84 @@ textarea{resize:vertical;min-height:68px}
 .ramt.thu{color:var(--thu-d)}
 .ramt.chi{color:var(--chi-d)}
 
-/* MONTHLY TABLE */
+/* ══ MONTHLY TABLE ══ */
 .mtable{width:100%;border-collapse:collapse;font-size:13px}
-.mtable th{padding:8px 6px;text-align:right;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;color:var(--muted)}
+.mtable th{padding:9px 7px;text-align:right;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.3px}
 .mtable th:first-child{text-align:left}
-.mtable td{padding:9px 6px;border-bottom:1px solid var(--border)}
-.mtable td:first-child{font-weight:600}
+.mtable td{padding:10px 7px;border-bottom:1px solid var(--border)}
+.mtable td:first-child{font-weight:700;color:var(--navy2)}
 .mtable td:not(:first-child){text-align:right}
+.mtable tbody tr:hover{background:var(--bg)}
 
-/* SECTION */
+/* ══ SECTION ══ */
 .sec{display:none}
 .sec.on{display:block}
 
-/* SPINNER */
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+/* ══ SPINNER ══ */
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* TOAST */
-#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none}
-.toast{background:#1e293b;color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.25);animation:toast-in .3s;max-width:320px;text-align:center}
+/* ══ TOAST ══ */
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:8000;display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none}
+.toast{
+  background:var(--navy);color:#fff;padding:11px 20px;border-radius:12px;
+  font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.3);
+  animation:toast-in .3s;max-width:320px;text-align:center;
+}
 .toast.ok{background:linear-gradient(135deg,var(--thu-d),var(--thu))}
 .toast.err{background:linear-gradient(135deg,var(--chi-d),var(--chi))}
-.toast.warn{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.toast.warn{background:linear-gradient(135deg,#d97706,var(--gold))}
 @keyframes toast-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-/* QUICK BTNS */
+/* ══ CHAT / SEARCH ══ */
+.chat-row{display:flex;gap:8px;margin-bottom:10px}
+.chat-in{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit}
+.chat-in:focus{outline:none;border-color:var(--gold)}
 .qbtns{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
 .qbtns .btn{padding:7px 11px;font-size:12px}
+
+/* ══ CHANGE PASSWORD SECTION ══ */
+.pwd-section{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}
+.pwd-section h4{font-size:13px;font-weight:700;color:var(--navy2);margin-bottom:12px}
 
 @media(max-width:400px){
   .fgrow{grid-template-columns:1fr}
   .sum-val{font-size:12px}
-  .nav-logo{font-size:15px}
+  .nav-logo{font-size:14px}
   .tab-btn{padding:6px 9px;font-size:11px}
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ══════════════════════ LOGIN OVERLAY ══════════════════════ -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">💰</div>
+    <div class="login-title">Thu Chi Cá Nhân</div>
+    <div class="login-sub" id="loginSubtitle">Nhập mật khẩu để tiếp tục</div>
+    <input class="login-input" type="password" id="loginPwd"
+      placeholder="Nhập mật khẩu..." autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <label class="login-remember">
+      <input type="checkbox" id="rememberMe" checked/>
+      Ghi nhớ trên thiết bị này
+    </label>
+    <button class="login-btn" onclick="doLogin()">🔓 Đăng nhập</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-version">v2.0 • Bảo mật bằng mật khẩu</div>
+  </div>
+</div>
+
+<!-- ══════════════════════ NAV ══════════════════════ -->
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">💰 Thu Chi
-      <span id="connDot" title="Trạng thái kết nối" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-left:8px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;vertical-align:middle">
-        <span id="connDotIcon" style="width:8px;height:8px;border-radius:50%;background:#fbbf24;display:inline-block"></span>
-        <span id="connDotText">Đang kiểm tra...</span>
+    <div class="nav-logo">
+      <div class="nav-logo-icon">💰</div>
+      Thu Chi
+      <span class="nav-conn">
+        <span id="connDotIcon" style="width:7px;height:7px;border-radius:50%;background:#fbbf24;display:inline-block"></span>
+        <span id="connDotText">Đang kết nối...</span>
       </span>
     </div>
     <div class="nav-tabs">
@@ -200,19 +323,19 @@ textarea{resize:vertical;min-height:68px}
   </div>
 </nav>
 
-<!-- SETUP BANNER -->
-<div class="setup-banner" id="setupBanner">
-  <div class="setup-icon">⚙️</div>
-  <div class="setup-text">
+<!-- ══════════════════════ SETUP BANNER ══════════════════════ -->
+<div class="setup-banner hidden" id="setupBanner">
+  <div style="font-size:28px;flex-shrink:0">⚙️</div>
+  <div>
     <h3>Chưa cấu hình ứng dụng</h3>
-    <p>Vui lòng nhập Google Sheet ID và Gemini API Key để bắt đầu sử dụng.</p>
+    <p>Vui lòng nhập Google Sheet ID và Gemini API Key để bắt đầu.</p>
     <button class="btn-setup" onclick="goTab('settings',document.querySelectorAll('.tab-btn')[2])">Vào Cài Đặt →</button>
   </div>
 </div>
 
 <div class="main">
 
-<!-- ===== TRANG CHỦ ===== -->
+<!-- ══════════════════════ HOME ══════════════════════ -->
 <div id="home" class="sec on">
   <div class="sum-grid">
     <div class="sum-card thu"><div class="sum-label">Tổng Thu</div><div class="sum-val" id="sThu">—</div></div>
@@ -220,122 +343,106 @@ textarea{resize:vertical;min-height:68px}
     <div class="sum-card loi"><div class="sum-label">Lợi Nhuận</div><div class="sum-val" id="sLoi">—</div></div>
   </div>
 
-  <!-- VOICE -->
   <div class="card">
-    <div class="card-title">🎤 Nhập Giọng Nói</div>
+    <div class="card-title">🎤 Nhập Bằng Giọng Nói</div>
     <div class="voice-wrap">
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
       <div class="voice-hint" id="vHint">Nhấn để ghi âm — nói tự nhiên tiếng Việt</div>
     </div>
-    <div class="voice-text" id="vText">Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán giường hôm nay"</div>
+    <div class="voice-text" id="vText">Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán ghế hôm nay"</div>
     <div style="margin-top:10px">
-      <button class="btn btn-primary btn-full" id="analyzeBtn" onclick="doAnalyze()" style="display:none">
+      <button class="btn btn-gold btn-full" id="analyzeBtn" onclick="doAnalyze()" style="display:none">
         🔍 Phân Tích AI
       </button>
     </div>
   </div>
 
-  <!-- TEXT FORM -->
   <div class="card">
-    <div class="card-title">⌨️ Nhập Text</div>
+    <div class="card-title">⌨️ Nhập Text Thủ Công</div>
     <div class="type-tabs">
       <button class="type-tab thu on" id="tabThu" onclick="setType('thu')">💰 THU</button>
       <button class="type-tab chi" id="tabChi" onclick="setType('chi')">💸 CHI</button>
     </div>
     <div class="fgrow">
-      <div class="fg">
-        <label>📅 Ngày giờ</label>
-        <input type="datetime-local" id="fDate"/>
-      </div>
-      <div class="fg">
-        <label>💵 Số tiền (₫)</label>
-        <input type="number" id="fAmount" placeholder="1500000"/>
-      </div>
+      <div class="fg"><label>📅 Ngày giờ</label><input type="datetime-local" id="fDate"/></div>
+      <div class="fg"><label>💵 Số tiền (₫)</label><input type="number" id="fAmount" placeholder="1500000"/></div>
     </div>
     <div class="fgrow">
-      <div class="fg">
-        <label>👤 Tên đối tượng</label>
-        <input type="text" id="fName" placeholder="Anh Hùng"/>
-      </div>
+      <div class="fg"><label>👤 Tên đối tượng</label><input type="text" id="fName" placeholder="Tên người..."/></div>
       <div class="fg" id="fAddrWrap">
         <label>📍 Địa chỉ</label>
-        <input type="text" id="fAddr" placeholder="Quang Trung..." autocomplete="off" autocorrect="off" autocapitalize="off"/>
+        <input type="text" id="fAddr" placeholder="Địa chỉ..." autocomplete="off"/>
       </div>
     </div>
-    <div class="fg">
-      <label>📝 Nội dung</label>
-      <textarea id="fNote" placeholder="Mô tả giao dịch..."></textarea>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="submitForm()">💾 Xem Trước & Lưu</button>
+    <div class="fg"><label>📝 Nội dung</label><textarea id="fNote" placeholder="Mô tả giao dịch..."></textarea></div>
+    <button class="btn btn-primary btn-full" onclick="submitForm()">👁 Xem Trước & Lưu</button>
   </div>
 
-  <!-- RECENT -->
   <div class="card">
-    <div class="card-title">🕐 Giao Dịch Gần Đây
+    <div class="card-title">
+      🕐 Giao Dịch Gần Đây
       <div style="display:flex;gap:6px;margin-left:auto">
         <button class="btn btn-outline btn-sm" onclick="openGoogleSheet()" title="Mở Google Sheet">📊</button>
         <button class="btn btn-outline btn-sm" onclick="loadSummary()" title="Tải lại">🔄</button>
       </div>
     </div>
-    <div class="rlist" id="recentList"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Đang tải...</div></div>
+    <div class="rlist" id="recentList">
+      <div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Đang tải...</div>
+    </div>
   </div>
 </div>
 
-<!-- ===== BÁO CÁO ===== -->
+<!-- ══════════════════════ REPORT ══════════════════════ -->
 <div id="report" class="sec">
   <div class="sum-grid">
     <div class="sum-card thu"><div class="sum-label">Tổng Thu</div><div class="sum-val" id="rThu">—</div></div>
     <div class="sum-card chi"><div class="sum-label">Tổng Chi</div><div class="sum-val" id="rChi">—</div></div>
     <div class="sum-card loi"><div class="sum-label">Lợi Nhuận</div><div class="sum-val" id="rLoi">—</div></div>
   </div>
-
   <div class="card">
     <div class="card-title">🔍 Tìm Kiếm Giao Dịch</div>
-    <div class="chat-row" style="margin-bottom:10px">
-      <input class="chat-in" id="searchIn" placeholder="Tìm theo tên, nội dung, số tiền..." onkeydown="if(event.key==='Enter')doSearch()"/>
+    <div class="chat-row">
+      <input class="chat-in" id="searchIn" placeholder="Tên, nội dung, số tiền..." onkeydown="if(event.key==='Enter')doSearch()"/>
       <button class="btn btn-primary" onclick="doSearch()">🔍</button>
     </div>
     <div class="qbtns">
       <button class="btn btn-outline" onclick="setSearchAndRun('tháng này')">📅 Tháng này</button>
       <button class="btn btn-outline" onclick="setSearchAndRun('tháng trước')">📆 Tháng trước</button>
     </div>
-    <div id="searchResults" style="margin-top:10px"></div>
+    <div id="searchResults"></div>
   </div>
-
   <div class="card">
     <div class="card-title">📅 Thống Kê Theo Tháng</div>
     <div id="monthlyTable"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Đang tải...</div></div>
   </div>
 </div>
 
-<!-- ===== CÀI ĐẶT ===== -->
+<!-- ══════════════════════ SETTINGS ══════════════════════ -->
 <div id="settings" class="sec">
 
-  <!-- CONFIG -->
   <div class="card">
-    <div class="card-title">🔑 Cấu Hình API
+    <div class="card-title">
+      🔑 Cấu Hình API
       <span class="cfg-status no" id="cfgStatus">❌ Chưa cấu hình</span>
     </div>
-    <button class="btn btn-outline btn-full" onclick="openGoogleSheet()" style="margin-bottom:12px;font-size:13px;">
-      📊 Mở Google Sheet để kiểm tra dữ liệu
+    <button class="btn btn-outline btn-full" onclick="openGoogleSheet()" style="margin-bottom:12px;font-size:13px">
+      📊 Mở Google Sheet kiểm tra dữ liệu
     </button>
 
-    <!-- Trạng thái đã lưu (hiển thị khi đã cấu hình) -->
     <div id="cfgSavedPanel" style="display:none;background:#f0fdf4;border:1.5px solid var(--thu);border-radius:11px;padding:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;color:var(--thu-d);margin-bottom:10px">✅ Đã lưu trên server — không cần nhập lại</div>
-      <div id="cfgSavedList" style="display:flex;flex-direction:column;gap:7px;font-size:13px"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--thu-d);margin-bottom:10px">✅ Đã lưu — không cần nhập lại</div>
+      <div id="cfgSavedList" style="display:flex;flex-direction:column;gap:7px;font-size:12px"></div>
       <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%" onclick="toggleCfgForm()">✏️ Chỉnh sửa / Cập nhật</button>
     </div>
 
-    <!-- Form nhập (ẩn khi đã có đủ config) -->
     <div id="cfgForm">
       <div class="cfg-field">
-        <label>📊 Google Sheet ID <a href="https://docs.google.com/spreadsheets" target="_blank" style="font-size:11px;color:var(--acc)">(Mở Sheet)</a></label>
+        <label>📊 Google Sheet ID</label>
         <input type="text" id="cfgSheetId" placeholder="Dán Sheet ID vào đây..."/>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Lấy từ URL: docs.google.com/spreadsheets/d/<b>[ID NÀY]</b>/edit</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Lấy từ URL: spreadsheets/d/<b>[ID NÀY]</b>/edit</div>
       </div>
       <div class="cfg-field">
-        <label>🤖 Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px;color:var(--acc)">(Lấy Key)</a></label>
+        <label>🤖 Gemini API Key</label>
         <input type="password" id="cfgGemini" placeholder="AIza..."/>
       </div>
       <div class="cfg-field">
@@ -348,31 +455,24 @@ textarea{resize:vertical;min-height:68px}
       </div>
       <button class="btn btn-primary btn-full" id="saveCfgBtn" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
     </div>
-
-    <div style="margin-top:10px;padding:12px;background:#f8fafc;border-radius:10px;font-size:12px;color:var(--muted);line-height:1.7">
-      🔒 <b>Bảo mật:</b> API key được lưu trong Google Apps Script Properties (phía server), <b>không lộ ra ngoài</b>. Mọi thiết bị truy cập đều dùng chung cấu hình này.
-    </div>
   </div>
 
-  <!-- GAS URL + DIAGNOSTIC -->
   <div class="card">
     <div class="card-title">🔗 URL Google Apps Script</div>
-    <div class="fg">
-      <label>Dán Web App URL của GAS vào đây</label>
-      <input type="url" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec" oninput="onGasUrlChange()"/>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Sau khi Deploy GAS, copy URL (<b>kết thúc bằng /exec</b>) và dán vào đây</div>
+    <div class="cfg-field">
+      <label>Dán Web App URL (kết thúc /exec)</label>
+      <input type="url" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec"/>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <button class="btn btn-success" style="flex:2" onclick="saveGasUrl()">✅ Lưu URL</button>
+      <button class="btn btn-gold" style="flex:2" onclick="saveGasUrl()">✅ Lưu URL</button>
       <button class="btn btn-primary" style="flex:1" onclick="runDiagnostic()">🔬 Chẩn đoán</button>
-    </div>    <!-- DIAGNOSTIC PANEL -->
+    </div>
     <div id="diagPanel" style="display:none;background:#0f172a;border-radius:12px;padding:14px;font-family:monospace;font-size:12px;line-height:1.9">
       <div style="color:#94a3b8;margin-bottom:8px;font-size:11px;font-family:sans-serif;font-weight:700">📋 KẾT QUẢ CHẨN ĐOÁN</div>
       <div id="diagLog"></div>
     </div>
   </div>
 
-  <!-- PREFERENCES -->
   <div class="card">
     <div class="card-title">🎛️ Tùy Chọn</div>
     <div class="set-row">
@@ -389,22 +489,36 @@ textarea{resize:vertical;min-height:68px}
     </div>
   </div>
 
+  <!-- ĐỔI MẬT KHẨU -->
+  <div class="card">
+    <div class="card-title">🔒 Bảo Mật & Mật Khẩu</div>
+    <div class="pwd-section">
+      <h4>Đổi Mật Khẩu</h4>
+      <div class="cfg-field"><label>Mật khẩu hiện tại</label><input type="password" id="pwdOld" placeholder="Nhập mật khẩu hiện tại"/></div>
+      <div class="cfg-field"><label>Mật khẩu mới</label><input type="password" id="pwdNew" placeholder="Nhập mật khẩu mới (tối thiểu 4 ký tự)"/></div>
+      <div class="cfg-field"><label>Xác nhận mật khẩu mới</label><input type="password" id="pwdConfirm" placeholder="Nhập lại mật khẩu mới"/></div>
+      <button class="btn btn-primary btn-full" onclick="changePassword()">🔒 Cập Nhật Mật Khẩu</button>
+    </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline btn-full" onclick="doLogout()" style="color:var(--chi-d);border-color:var(--chi)">🚪 Đăng Xuất</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">💡 Hướng Dẫn Nói</div>
-    <div style="font-size:13px;color:var(--muted);line-height:1.9">
-      <b>🎤 Ví dụ câu THU:</b><br>
+    <div style="font-size:12px;color:var(--muted);line-height:1.9">
+      <b style="color:var(--thu-d)">💰 Ví dụ câu THU:</b><br>
       • "Thu 1 triệu 5 từ anh Tuấn tiền bán bàn"<br>
       • "Nhận 2 triệu từ chị Lan ở Quang Trung hôm nay"<br><br>
-      <b>🎤 Ví dụ câu CHI:</b><br>
+      <b style="color:var(--chi-d)">💸 Ví dụ câu CHI:</b><br>
       • "Chi 300 ngàn mua nguyên liệu"<br>
-      • "Trả 500k cho anh Nam tiền công"
+      • "Trả 500k cho anh Nam tiền công lắp đặt"
     </div>
   </div>
 </div>
 
-</div><!-- end main -->
+</div><!-- /main -->
 
-<!-- TOASTS -->
 <div id="toasts"></div>
 
 <!-- CONFIRM MODAL -->
@@ -421,142 +535,178 @@ textarea{resize:vertical;min-height:68px}
 
 <script>
 // ================================================================
-//  CONFIG & STATE
+//  PASSWORD SYSTEM
 // ================================================================
+const DEFAULT_PWD_HASH = 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'; // SHA-256 of "123"
 
-// Ưu tiên: config.js → localStorage → trống
-// (config.js = cài một lần cho tất cả thiết bị)
-function _resolveGasUrl() {
-  const cfg = window.APP_CONFIG;
-  if (cfg && cfg.gasUrl && !cfg.gasUrl.includes('ĐÂY_LÀ_SCRIPT_ID')) {
-    return cfg.gasUrl.trim();
+async function sha256(str) {
+  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function initAuth() {
+  const hash = localStorage.getItem('tc_pwdhash');
+  if (!hash) {
+    // Lần đầu dùng: đặt mật khẩu mặc định "1234"
+    localStorage.setItem('tc_pwdhash', await sha256('1234'));
+    document.getElementById('loginSubtitle').textContent = 'Mật khẩu mặc định: 1234 (đổi ngay trong Cài đặt)';
   }
+  // Kiểm tra "ghi nhớ"
+  const until = localStorage.getItem('tc_remember_until');
+  if (until && Date.now() < Number(until)) {
+    unlock(); return;
+  }
+  // Kiểm tra session (tab hiện tại)
+  if (sessionStorage.getItem('tc_unlocked') === '1') {
+    unlock(); return;
+  }
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('loginPwd').focus(), 100);
+}
+
+async function doLogin() {
+  const pwd  = document.getElementById('loginPwd').value;
+  const hash = localStorage.getItem('tc_pwdhash') || (await sha256('1234'));
+  const input_hash = await sha256(pwd);
+  if (input_hash !== hash) {
+    document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng, thử lại!';
+    document.getElementById('loginPwd').value = '';
+    document.getElementById('loginPwd').focus();
+    return;
+  }
+  document.getElementById('loginErr').textContent = '';
+  const remember = document.getElementById('rememberMe').checked;
+  if (remember) {
+    localStorage.setItem('tc_remember_until', Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 ngày
+  } else {
+    localStorage.removeItem('tc_remember_until');
+  }
+  sessionStorage.setItem('tc_unlocked', '1');
+  unlock();
+}
+
+function unlock() {
+  document.getElementById('loginOverlay').classList.add('hidden');
+  appInit();
+}
+
+async function changePassword() {
+  const oldPwd  = document.getElementById('pwdOld').value;
+  const newPwd  = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+  if (!oldPwd || !newPwd || !confirm) { toast('Vui lòng điền đủ 3 ô', 'warn'); return; }
+  if (newPwd.length < 4) { toast('Mật khẩu mới cần ít nhất 4 ký tự', 'warn'); return; }
+  if (newPwd !== confirm) { toast('Mật khẩu mới không khớp', 'err'); return; }
+  const curHash  = localStorage.getItem('tc_pwdhash');
+  const oldHash  = await sha256(oldPwd);
+  if (oldHash !== curHash) { toast('Mật khẩu hiện tại không đúng', 'err'); return; }
+  localStorage.setItem('tc_pwdhash', await sha256(newPwd));
+  localStorage.setItem('tc_remember_until', Date.now() + 30 * 24 * 60 * 60 * 1000);
+  document.getElementById('pwdOld').value = '';
+  document.getElementById('pwdNew').value = '';
+  document.getElementById('pwdConfirm').value = '';
+  toast('✅ Đã đổi mật khẩu thành công!', 'ok');
+}
+
+function doLogout() {
+  if (!confirm('Đăng xuất? Bạn sẽ cần nhập lại mật khẩu.')) return;
+  sessionStorage.removeItem('tc_unlocked');
+  localStorage.removeItem('tc_remember_until');
+  location.reload();
+}
+
+// ================================================================
+//  APP CONFIG & STATE
+// ================================================================
+function resolveGasUrl() {
+  const cfg = window.APP_CONFIG;
+  if (cfg && cfg.gasUrl && !cfg.gasUrl.includes('ĐÂY_LÀ_SCRIPT_ID')) return cfg.gasUrl.trim();
   return localStorage.getItem('gasUrl') || '';
 }
 
-let GAS_URL = _resolveGasUrl();
-let curType = 'thu';
-let pendingData = null;
-let prefs = { voice: true, telegram: false, autoSave: false };
+let GAS_URL   = '';
+let curType   = 'thu';
+let pending   = null;
+let prefs     = { voice: true, telegram: false, autoSave: false };
 
 // ================================================================
-//  INIT
+//  APP INIT (chạy sau khi login xong)
 // ================================================================
-window.onload = () => {
-  // Đăng ký Service Worker cho PWA (offline support)
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[App] SW registered, scope:', reg.scope))
-      .catch(err => console.log('[App] SW registration failed:', err));
-  }
-
+function appInit() {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  GAS_URL = resolveGasUrl();
   loadPrefs();
   setNow();
   setConnStatus(GAS_URL ? 'checking' : 'error');
-
   if (GAS_URL) {
     document.getElementById('cfgGasUrl').value = GAS_URL;
-    _syncGasUrlInput();
     checkConfig();
     loadSummary();
   } else {
     showSetupBanner(true);
     setConnStatus('error');
   }
-};
+}
 
 function setNow() {
-  const now = new Date();
-  const p = n => String(n).padStart(2,'0');
+  const now = new Date(), p = n => String(n).padStart(2,'0');
   document.getElementById('fDate').value =
     `${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())}T${p(now.getHours())}:${p(now.getMinutes())}`;
 }
 
 // ================================================================
-//  GAS URL & CONFIG
+//  CONNECTION STATUS
 // ================================================================
-function onGasUrlChange() {
-  const url = document.getElementById('cfgGasUrl').value.trim();
-  if (url) document.getElementById('cfgGasUrl').style.borderColor = 'var(--acc)';
+function setConnStatus(state) {
+  const dot  = document.getElementById('connDotIcon');
+  const text = document.getElementById('connDotText');
+  if      (state==='ok')      { dot.style.background='#4ade80'; text.textContent='Đã kết nối'; }
+  else if (state==='error')   { dot.style.background='#f87171'; text.textContent='Chưa kết nối'; }
+  else                        { dot.style.background='#fbbf24'; text.textContent='Đang kiểm tra...'; }
 }
 
+// ================================================================
+//  GAS URL
+// ================================================================
 function saveGasUrl() {
   const url = document.getElementById('cfgGasUrl').value.trim();
-  if (!url || !url.includes('script.google.com')) {
-    toast('URL không hợp lệ. Phải là URL của Google Apps Script', 'err'); return;
-  }
+  if (!url || !url.includes('script.google.com')) { toast('URL không hợp lệ', 'err'); return; }
   GAS_URL = url;
   localStorage.setItem('gasUrl', url);
   toast('✅ Đã lưu URL GAS!', 'ok');
   setConnStatus('checking');
-  checkConfig();
-  loadSummary();
-  showSetupBanner(false);
+  checkConfig(); loadSummary(); showSetupBanner(false);
 }
 
-// Hiển thị URL hiện tại (từ config.js hoặc localStorage) vào ô input
-function _syncGasUrlInput() {
-  const el = document.getElementById('cfgGasUrl');
-  if (el && GAS_URL) el.value = GAS_URL;
-}
-
+// ================================================================
+//  CONFIG
+// ================================================================
 async function saveConfig() {
-  if (!GAS_URL) { toast('Vui lòng nhập URL GAS trước', 'warn'); return; }
-  const config = {
+  if (!GAS_URL) { toast('Vui lòng nhập và lưu URL GAS trước', 'warn'); return; }
+  const cfg = {
     sheetId:       document.getElementById('cfgSheetId').value.trim(),
     geminiKey:     document.getElementById('cfgGemini').value.trim(),
     telegramToken: document.getElementById('cfgTgToken').value.trim(),
     telegramChatId:document.getElementById('cfgTgChat').value.trim()
   };
-  if (!config.sheetId && !config.geminiKey) {
-    toast('Vui lòng nhập ít nhất Sheet ID và Gemini Key', 'warn'); return;
-  }
+  if (!cfg.sheetId && !cfg.geminiKey) { toast('Nhập ít nhất Sheet ID và Gemini Key', 'warn'); return; }
   const btn = document.getElementById('saveCfgBtn');
-  btn.innerHTML = '<span class="spin"></span> Đang lưu...';
-  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Đang lưu...'; btn.disabled = true;
   try {
-    // Cache sheet ID locally để dùng cho nút mở sheet
-    if (config.sheetId) localStorage.setItem('cached_sheetId', config.sheetId);
-    const r = await api('saveConfig', { config });
+    if (cfg.sheetId) localStorage.setItem('cached_sheetId', cfg.sheetId);
+    const r = await api('saveConfig', { config: cfg });
     toast(r.message || (r.success ? '✅ Đã lưu!' : '❌ Lỗi'), r.success ? 'ok' : 'err');
-    if (r.success) {
-      checkConfig();
-      // Xóa các field password sau khi lưu
-      document.getElementById('cfgGemini').value = '';
-      document.getElementById('cfgTgToken').value = '';
-    }
-  } catch(e) {
-    toast('Lỗi kết nối: ' + e.message, 'err');
-  }
-  btn.innerHTML = '💾 Lưu Cấu Hình';
-  btn.disabled = false;
-}
-
-// ================================================================
-//  TRẠNG THÁI KẾT NỐI
-// ================================================================
-function setConnStatus(state) {
-  // state: 'checking' | 'ok' | 'error'
-  const dot  = document.getElementById('connDotIcon');
-  const text = document.getElementById('connDotText');
-  if (state === 'ok') {
-    dot.style.background  = '#4ade80';
-    text.textContent      = 'Đã kết nối';
-  } else if (state === 'error') {
-    dot.style.background  = '#f87171';
-    text.textContent      = 'Chưa kết nối';
-  } else {
-    dot.style.background  = '#fbbf24';
-    text.textContent      = 'Đang kiểm tra...';
-  }
+    if (r.success) { checkConfig(); document.getElementById('cfgGemini').value = ''; document.getElementById('cfgTgToken').value = ''; }
+  } catch(e) { toast('Lỗi: ' + e.message, 'err'); }
+  btn.innerHTML = '💾 Lưu Cấu Hình'; btn.disabled = false;
 }
 
 function toggleCfgForm() {
   const form  = document.getElementById('cfgForm');
   const panel = document.getElementById('cfgSavedPanel');
-  const showing = form.style.display !== 'none';
-  form.style.display  = showing ? 'none' : '';
-  panel.style.display = showing ? ''     : 'none';
+  const show  = form.style.display === 'none';
+  form.style.display  = show ? '' : 'none';
+  panel.style.display = show ? 'none' : '';
 }
 
 async function checkConfig() {
@@ -565,190 +715,31 @@ async function checkConfig() {
   try {
     const r = await gasGet('getConfig');
     const el = document.getElementById('cfgStatus');
-
     if (r.configured) {
-      // Hiện panel "đã lưu"
-      el.textContent  = '✅ Đã cấu hình';
-      el.className    = 'cfg-status ok';
-      showSetupBanner(false);
-      setConnStatus('ok');
-
-      // Hiển thị chi tiết những gì đã lưu
+      el.textContent = '✅ Đã cấu hình'; el.className = 'cfg-status ok';
+      showSetupBanner(false); setConnStatus('ok');
       const list = document.getElementById('cfgSavedList');
       list.innerHTML = [
-        { icon:'📊', label:'Google Sheet ID',  saved: r.hasSheetId   },
-        { icon:'🤖', label:'Gemini API Key',   saved: r.hasGeminiKey },
-        { icon:'📱', label:'Telegram',         saved: r.hasTelegram, optional: true }
-      ].map(item => `
-        <div style="display:flex;align-items:center;gap:8px">
-          <span>${item.saved ? '✅' : (item.optional ? '⬜' : '❌')}</span>
-          <span style="color:${item.saved ? 'var(--thu-d)' : (item.optional ? 'var(--muted)' : 'var(--chi-d)')}">
-            ${item.icon} ${item.label}: <b>${item.saved ? 'Đã lưu' : (item.optional ? 'Chưa cài (tùy chọn)' : 'CHƯA LƯU')}</b>
-          </span>
-        </div>`).join('');
-
+        { icon:'📊', label:'Google Sheet ID', saved: r.hasSheetId },
+        { icon:'🤖', label:'Gemini API Key',  saved: r.hasGeminiKey },
+        { icon:'📱', label:'Telegram',        saved: r.hasTelegram, opt: true }
+      ].map(i => `<div style="display:flex;align-items:center;gap:8px">
+        <span>${i.saved ? '✅' : (i.opt ? '⬜' : '❌')}</span>
+        <span style="color:${i.saved ? 'var(--thu-d)' : (i.opt ? 'var(--muted)' : 'var(--chi-d)')}">
+          ${i.icon} ${i.label}: <b>${i.saved ? 'Đã lưu' : (i.opt ? 'Chưa cài (tùy chọn)' : 'CHƯA LƯU')}</b>
+        </span></div>`).join('');
       document.getElementById('cfgSavedPanel').style.display = '';
       document.getElementById('cfgForm').style.display = 'none';
-
     } else {
-      el.textContent = '❌ Chưa đủ';
-      el.className   = 'cfg-status no';
-      showSetupBanner(true);
-      setConnStatus('error');
+      el.textContent = '❌ Chưa đủ'; el.className = 'cfg-status no';
+      showSetupBanner(true); setConnStatus('error');
       document.getElementById('cfgSavedPanel').style.display = 'none';
       document.getElementById('cfgForm').style.display = '';
     }
-  } catch(e) {
-    setConnStatus('error');
-  }
+  } catch(e) { setConnStatus('error'); }
 }
 
-async function testConn() {
-  if (!GAS_URL) { toast('Chưa có URL GAS', 'warn'); return; }
-  try {
-    const r = await gasGet('testConnection');
-    toast(r.message || 'OK', r.success ? 'ok' : 'err');
-  } catch(e) {
-    toast('Không kết nối được: ' + e.message, 'err');
-  }
-}
-
-// ================================================================
-//  DIAGNOSTIC — Chẩn đoán lỗi từng bước
-// ================================================================
-async function runDiagnostic() {
-  const url = document.getElementById('cfgGasUrl').value.trim() || GAS_URL;
-  const panel = document.getElementById('diagPanel');
-  const log = document.getElementById('diagLog');
-
-  panel.style.display = 'block';
-  log.innerHTML = '';
-
-  function diagLine(icon, label, status, detail = '') {
-    const colors = { ok: '#4ade80', err: '#f87171', warn: '#fbbf24', info: '#60a5fa', run: '#a78bfa' };
-    const c = colors[status] || '#94a3b8';
-    log.innerHTML += `<div><span style="color:${c}">${icon}</span> <span style="color:#e2e8f0">${label}</span>${detail ? `<br><span style="color:#64748b;padding-left:20px">↳ ${detail}</span>` : ''}</div>`;
-    panel.scrollTop = panel.scrollHeight;
-  }
-
-  diagLine('⏳', 'Bắt đầu chẩn đoán...', 'run');
-
-  // BƯỚC 1: Kiểm tra URL hợp lệ
-  diagLine('🔍', 'Bước 1: Kiểm tra URL...', 'info');
-  if (!url) {
-    diagLine('❌', 'THẤT BẠI: URL trống!', 'err', 'Hãy dán URL GAS vào ô trên rồi nhấn Lưu URL trước');
-    return;
-  }
-  if (!url.startsWith('https://script.google.com')) {
-    diagLine('❌', 'THẤT BẠI: URL sai định dạng', 'err', `URL phải bắt đầu bằng https://script.google.com — bạn đang dán: ${url.substring(0,50)}...`);
-    return;
-  }
-  if (!url.endsWith('/exec')) {
-    diagLine('⚠️', 'CẢNH BÁO: URL không kết thúc bằng /exec', 'warn', `URL hiện tại: ...${url.slice(-30)} — Hãy đảm bảo copy đúng URL deploy`);
-  } else {
-    diagLine('✅', 'URL hợp lệ', 'ok', url.substring(0, 60) + '...');
-  }
-
-  // BƯỚC 2: Ping GAS (GET không có action)
-  diagLine('🌐', 'Bước 2: Ping GAS server...', 'info');
-  try {
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(url + '?action=testConnection', {
-      method: 'GET',
-      redirect: 'follow',
-      signal: controller.signal
-    });
-    clearTimeout(tid);
-
-    if (res.ok) {
-      diagLine('✅', `GAS phản hồi — HTTP ${res.status}`, 'ok');
-      try {
-        const data = await res.json();
-        if (data.success) {
-          diagLine('✅', 'GAS trả về JSON đúng', 'ok', `message: "${data.message}"`);
-        } else {
-          diagLine('⚠️', 'GAS trả về nhưng success=false', 'warn', JSON.stringify(data));
-        }
-      } catch(je) {
-        diagLine('⚠️', 'GAS phản hồi nhưng không phải JSON', 'warn', 'Có thể đang trả về HTML — kiểm tra GAS deploy có đúng không');
-      }
-    } else {
-      diagLine('❌', `GAS trả về lỗi HTTP ${res.status}`, 'err', getHttpErrorHint(res.status));
-    }
-  } catch(e) {
-    if (e.name === 'AbortError') {
-      diagLine('❌', 'TIMEOUT — GAS không phản hồi sau 8 giây', 'err', 'Nguyên nhân thường gặp: GAS chưa được deploy, hoặc "Who has access" không phải "Anyone"');
-    } else if (e.message.includes('fetch')) {
-      diagLine('❌', 'Failed to fetch — Không thể kết nối tới GAS', 'err', `Chi tiết: ${e.message} | Nguyên nhân: CORS bị chặn hoặc GAS chưa deploy đúng quyền`);
-    } else {
-      diagLine('❌', 'Lỗi kết nối: ' + e.message, 'err');
-    }
-    diagLine('💡', 'GỢI Ý SỬA LỖI:', 'warn', '');
-    diagLine('', '1. Vào Apps Script → Triển khai → Quản lý triển khai', 'info');
-    diagLine('', '2. Nhấn ✏️ Edit → "Ai có quyền truy cập" → chọn "Mọi người"', 'info');
-    diagLine('', '3. Nhấn Triển khai → copy URL mới và dán lại vào đây', 'info');
-    return;
-  }
-
-  // BƯỚC 3: Test POST
-  diagLine('📤', 'Bước 3: Test gửi dữ liệu POST...', 'info');
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'testConnection' }),
-      redirect: 'follow'
-    });
-    if (res.ok) {
-      const data = await res.json();
-      diagLine('✅', 'POST hoạt động bình thường', 'ok', `Nhận được: ${JSON.stringify(data)}`);
-    } else {
-      diagLine('❌', `POST thất bại — HTTP ${res.status}`, 'err', getHttpErrorHint(res.status));
-    }
-  } catch(e) {
-    diagLine('❌', 'POST thất bại: ' + e.message, 'err', 'Lưu ý: GAS không hỗ trợ OPTIONS preflight, dùng Content-Type: text/plain');
-  }
-
-  // BƯỚC 4: Kiểm tra config (Sheet ID, Gemini Key)
-  diagLine('🔑', 'Bước 4: Kiểm tra cấu hình API...', 'info');
-  try {
-    const res = await fetch(url + '?action=getConfig', { redirect: 'follow' });
-    const data = await res.json();
-    if (data.success) {
-      diagLine(data.hasSheetId   ? '✅' : '❌', 'Google Sheet ID: ' + (data.hasSheetId   ? 'Đã lưu' : 'CHƯA LƯU'), data.hasSheetId   ? 'ok' : 'err', data.hasSheetId ? '' : '→ Vào Cấu Hình API, nhập Sheet ID rồi nhấn Lưu Cấu Hình');
-      diagLine(data.hasGeminiKey ? '✅' : '❌', 'Gemini API Key: '  + (data.hasGeminiKey ? 'Đã lưu' : 'CHƯA LƯU'), data.hasGeminiKey ? 'ok' : 'err', data.hasGeminiKey ? '' : '→ Vào Cấu Hình API, nhập Gemini Key rồi nhấn Lưu Cấu Hình');
-      diagLine(data.hasTelegram  ? '✅' : '⬜', 'Telegram: ' + (data.hasTelegram ? 'Đã cấu hình' : 'Chưa cài (tùy chọn)'), data.hasTelegram ? 'ok' : 'info');
-
-      if (data.configured) {
-        diagLine('🎉', 'TẤT CẢ ĐÃ CẤU HÌNH ĐẦY ĐỦ!', 'ok', 'App sẵn sàng sử dụng');
-      } else {
-        diagLine('⚠️', 'Thiếu cấu hình — hãy lưu Sheet ID và Gemini Key', 'warn');
-      }
-    } else {
-      diagLine('❌', 'Không đọc được config từ GAS', 'err', data.message || '');
-    }
-  } catch(e) {
-    diagLine('❌', 'Không kiểm tra được config: ' + e.message, 'err');
-  }
-
-  diagLine('🏁', 'Chẩn đoán hoàn tất', 'info');
-}
-
-function getHttpErrorHint(status) {
-  const hints = {
-    401: 'Không có quyền — GAS chưa được set "Who has access: Anyone"',
-    403: 'Bị từ chối — Tài khoản Google chưa cấp quyền cho app này',
-    404: 'Không tìm thấy — URL sai hoặc deployment bị xóa',
-    429: 'Quá nhiều request — đợi vài phút rồi thử lại',
-    500: 'Lỗi GAS server — kiểm tra code trong Apps Script',
-  };
-  return hints[status] || `Lỗi HTTP ${status}`;
-}
-
-function showSetupBanner(show) {
-  document.getElementById('setupBanner').classList.toggle('hidden', !show);
-}
+function showSetupBanner(show) { document.getElementById('setupBanner').classList.toggle('hidden', !show); }
 
 // ================================================================
 //  PREFS
@@ -780,9 +771,6 @@ function goTab(id, btn) {
   if (id === 'report') loadReport();
 }
 
-// ================================================================
-//  TYPE SWITCH
-// ================================================================
 function setType(t) {
   curType = t;
   document.getElementById('tabThu').classList.toggle('on', t==='thu');
@@ -797,37 +785,28 @@ let recog = null, recoding = false;
 
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    toast('Trình duyệt không hỗ trợ. Dùng Chrome!', 'warn'); return;
+    toast('Trình duyệt không hỗ trợ, dùng Chrome!', 'warn'); return;
   }
   recoding ? stopVoice() : startVoice();
 }
 
 function startVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recog = new SR();
-  recog.lang = 'vi-VN';
-  recog.continuous = false;
-  recog.interimResults = true;
-
+  recog = new SR(); recog.lang = 'vi-VN'; recog.continuous = false; recog.interimResults = true;
   recog.onstart = () => {
     recoding = true;
-    const btn = document.getElementById('voiceBtn');
-    btn.classList.add('rec');
-    btn.textContent = '⏹';
+    document.getElementById('voiceBtn').classList.add('rec');
+    document.getElementById('voiceBtn').textContent = '⏹';
     document.getElementById('vHint').textContent = '🔴 Đang ghi âm... nhấn để dừng';
     document.getElementById('vText').textContent = '';
     document.getElementById('analyzeBtn').style.display = 'none';
   };
-
   recog.onresult = e => {
     let t = '';
     for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
     document.getElementById('vText').textContent = t;
-    if (e.results[e.results.length-1].isFinal) {
-      document.getElementById('analyzeBtn').style.display = '';
-    }
+    if (e.results[e.results.length-1].isFinal) document.getElementById('analyzeBtn').style.display = '';
   };
-
   recog.onend = () => stopVoice();
   recog.onerror = e => { toast('Lỗi mic: ' + e.error, 'err'); stopVoice(); };
   recog.start();
@@ -836,9 +815,8 @@ function startVoice() {
 function stopVoice() {
   recoding = false;
   if (recog) recog.stop();
-  const btn = document.getElementById('voiceBtn');
-  btn.classList.remove('rec');
-  btn.textContent = '🎤';
+  document.getElementById('voiceBtn').classList.remove('rec');
+  document.getElementById('voiceBtn').textContent = '🎤';
   document.getElementById('vHint').textContent = 'Nhấn để ghi âm lại';
 }
 
@@ -849,25 +827,14 @@ async function doAnalyze() {
   const text = document.getElementById('vText').textContent.trim();
   if (!text || text.startsWith('Ví dụ')) { toast('Chưa có nội dung', 'warn'); return; }
   if (!GAS_URL) { toast('Chưa cấu hình URL GAS', 'warn'); return; }
-
   const btn = document.getElementById('analyzeBtn');
-  btn.innerHTML = '<span class="spin"></span> Đang phân tích...';
-  btn.disabled = true;
-
+  btn.innerHTML = '<span class="spin"></span> Đang phân tích...'; btn.disabled = true;
   try {
     const r = await api('analyze', { text });
-    if (r.success) {
-      if (prefs.autoSave) doSave(r.parsed);
-      else showModal(r.parsed);
-    } else {
-      toast(r.message || 'Lỗi phân tích', 'err');
-    }
-  } catch(e) {
-    toast('Lỗi: ' + e.message, 'err');
-  }
-
-  btn.innerHTML = '🔍 Phân Tích AI';
-  btn.disabled = false;
+    if (r.success) { if (prefs.autoSave) doSave(r.parsed); else showModal(r.parsed); }
+    else toast(r.message || 'Lỗi phân tích', 'err');
+  } catch(e) { toast('Lỗi: ' + e.message, 'err'); }
+  btn.innerHTML = '🔍 Phân Tích AI'; btn.disabled = false;
 }
 
 // ================================================================
@@ -875,26 +842,23 @@ async function doAnalyze() {
 // ================================================================
 function submitForm() {
   const data = {
-    type: curType,
-    ngay: document.getElementById('fDate').value,
-    soTien: document.getElementById('fAmount').value,
+    type:        curType,
+    ngay:        document.getElementById('fDate').value,
+    soTien:      document.getElementById('fAmount').value,
     tenDoiTuong: document.getElementById('fName').value.trim(),
-    diaChi: curType==='thu' ? document.getElementById('fAddr').value.trim() : '',
-    noiDung: document.getElementById('fNote').value.trim()
+    diaChi:      curType==='thu' ? document.getElementById('fAddr').value.trim() : '',
+    noiDung:     document.getElementById('fNote').value.trim()
   };
-  if (!data.soTien || !data.tenDoiTuong || !data.noiDung) {
-    toast('Vui lòng điền: Số tiền, Tên, Nội dung', 'warn'); return;
-  }
+  if (!data.soTien || !data.tenDoiTuong || !data.noiDung) { toast('Vui lòng điền: Số tiền, Tên, Nội dung', 'warn'); return; }
   if (!GAS_URL) { toast('Chưa cấu hình URL GAS', 'warn'); return; }
-  if (prefs.autoSave) doSave(data);
-  else showModal(data);
+  if (prefs.autoSave) doSave(data); else showModal(data);
 }
 
 // ================================================================
-//  MODAL CONFIRM
+//  MODAL
 // ================================================================
 function showModal(data) {
-  pendingData = data;
+  pending = data;
   const isThu = data.type === 'thu';
   document.getElementById('mTitle').textContent = isThu ? '💰 Xác Nhận THU' : '💸 Xác Nhận CHI';
   document.getElementById('mSaveBtn').className = `btn ${isThu?'btn-success':'btn-danger'}`;
@@ -910,37 +874,29 @@ function showModal(data) {
 
   document.getElementById('mFields').innerHTML = fields.map(f => {
     let val = data[f.k] || '';
-    // Convert date for datetime-local input
     if (f.k === 'ngay' && val && val.includes('/')) {
       const m = val.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
       if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${(m[4]||'00').padStart(2,'0')}:${(m[5]||'00').padStart(2,'0')}`;
     }
-    return `<div class="cfg-field">
-      <label>${f.label}</label>
-      <input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/>
-    </div>`;
+    return `<div class="cfg-field"><label>${f.label}</label><input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/></div>`;
   }).join('');
 
   document.getElementById('modal').classList.remove('hidden');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
-  pendingData = null;
-}
+function closeModal() { document.getElementById('modal').classList.add('hidden'); pending = null; }
 
 function confirmSave() {
-  const data = { ...pendingData };
+  const data = { ...pending };
   ['ngay','soTien','tenDoiTuong','diaChi','noiDung'].forEach(k => {
     const el = document.getElementById('mf_' + k);
     if (el) data[k] = el.value;
   });
-  closeModal();
-  doSave(data);
+  closeModal(); doSave(data);
 }
 
 // ================================================================
-//  SAVE
+//  SAVE – gọi saveTransaction trên GAS
 // ================================================================
 async function doSave(data) {
   toast('⏳ Đang lưu vào Google Sheet...', '');
@@ -950,25 +906,20 @@ async function doSave(data) {
       toast(r.message, 'ok');
       if (prefs.voice) speak(r.message);
       resetForms();
-      setTimeout(() => loadSummary(), 1200); // Chờ GAS lưu xong rồi tải lại
+      setTimeout(() => loadSummary(), 1000);
     } else {
-      // Hiện lỗi chi tiết từ GAS
       toast('❌ ' + (r.message || 'Lỗi không xác định'), 'err');
-      console.error('[doSave] GAS lỗi:', r);
     }
-  } catch(e) {
-    toast('❌ Kết nối thất bại: ' + e.message, 'err');
-    console.error('[doSave] fetch lỗi:', e);
-  }
+  } catch(e) { toast('❌ Kết nối thất bại: ' + e.message, 'err'); }
 }
 
 function resetForms() {
-  document.getElementById('vText').textContent = 'Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán giường hôm nay"';
+  document.getElementById('vText').textContent = 'Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán ghế hôm nay"';
   document.getElementById('analyzeBtn').style.display = 'none';
   document.getElementById('fAmount').value = '';
-  document.getElementById('fName').value = '';
-  document.getElementById('fAddr').value = '';
-  document.getElementById('fNote').value = '';
+  document.getElementById('fName').value   = '';
+  document.getElementById('fAddr').value   = '';
+  document.getElementById('fNote').value   = '';
   setNow();
 }
 
@@ -980,23 +931,21 @@ async function loadSummary() {
   try {
     const r = await gasGet('getReport');
     if (!r.success) return;
-    const fmt = n => n.toLocaleString('vi-VN') + '₫';
+    const fmt = n => (n||0).toLocaleString('vi-VN') + '₫';
     document.getElementById('sThu').textContent = fmt(r.tongThu);
     document.getElementById('sChi').textContent = fmt(r.tongChi);
     const loiEl = document.getElementById('sLoi');
     loiEl.textContent = fmt(r.loiNhuan);
-    loiEl.style.color = r.loiNhuan >= 0 ? 'var(--thu-d)' : 'var(--chi-d)';
+    loiEl.style.color = (r.loiNhuan||0) >= 0 ? 'var(--thu-d)' : 'var(--chi-d)';
 
-    // Recent
     const items = [
-      ...r.recentThu.map(x => ({ row: x, t: 'thu' })),
-      ...r.recentChi.map(x => ({ row: x, t: 'chi' }))
+      ...( r.recentThu||[]).map(x => ({ row: x, t: 'thu' })),
+      ...( r.recentChi||[]).map(x => ({ row: x, t: 'chi' }))
     ].sort((a,b) => new Date(b.row[1]) - new Date(a.row[1])).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
-      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có giao dịch</div>';
-      return;
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có giao dịch</div>'; return;
     }
     list.innerHTML = items.map(({ row, t }) => `
       <div class="ritem">
@@ -1018,28 +967,26 @@ async function loadReport() {
   try {
     const r = await gasGet('getReport');
     if (!r.success) return;
-    const fmt = n => n.toLocaleString('vi-VN') + '₫';
+    const fmt = n => (n||0).toLocaleString('vi-VN') + '₫';
     document.getElementById('rThu').textContent = fmt(r.tongThu);
     document.getElementById('rChi').textContent = fmt(r.tongChi);
     document.getElementById('rLoi').textContent = fmt(r.loiNhuan);
 
-    const stats = r.monthlyStats;
+    const stats = r.monthlyStats || {};
     const months = Object.keys(stats).sort((a,b) => {
-      const [m1,y1]=a.split('/').map(Number), [m2,y2]=b.split('/').map(Number);
+      const [m1,y1] = a.split('/').map(Number), [m2,y2] = b.split('/').map(Number);
       return y1!==y2 ? y1-y2 : m1-m2;
     });
-
     const tbl = document.getElementById('monthlyTable');
     if (!months.length) {
-      tbl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có dữ liệu</div>';
-      return;
+      tbl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có dữ liệu</div>'; return;
     }
     tbl.innerHTML = `<table class="mtable">
       <thead><tr>
         <th>Tháng</th>
         <th style="color:var(--thu-d)">Thu</th>
         <th style="color:var(--chi-d)">Chi</th>
-        <th style="color:var(--acc)">Lợi nhuận</th>
+        <th style="color:var(--gold-d)">Lợi nhuận</th>
       </tr></thead>
       <tbody>${months.map(m => {
         const s = stats[m], loi = s.thu - s.chi;
@@ -1047,7 +994,7 @@ async function loadReport() {
           <td>T${m}</td>
           <td style="color:var(--thu-d)">${s.thu.toLocaleString('vi-VN')}₫</td>
           <td style="color:var(--chi-d)">${s.chi.toLocaleString('vi-VN')}₫</td>
-          <td style="color:${loi>=0?'var(--thu-d)':'var(--chi-d)'}">${loi.toLocaleString('vi-VN')}₫</td>
+          <td style="color:${loi>=0?'var(--thu-d)':'var(--chi-d)'};font-weight:800">${loi.toLocaleString('vi-VN')}₫</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
@@ -1055,106 +1002,137 @@ async function loadReport() {
 }
 
 // ================================================================
-//  TÌM KIẾM GIAO DỊCH
+//  SEARCH
 // ================================================================
-function setSearchAndRun(keyword) {
-  document.getElementById('searchIn').value = keyword;
-  doSearch();
-}
+function setSearchAndRun(kw) { document.getElementById('searchIn').value = kw; doSearch(); }
 
 async function doSearch() {
-  const keyword = document.getElementById('searchIn').value.trim();
-  if (!keyword) return;
-  if (!GAS_URL) { toast('Chưa cấu hình URL GAS', 'warn'); return; }
-
+  const kw = document.getElementById('searchIn').value.trim();
+  if (!kw) return;
   const box = document.getElementById('searchResults');
   box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">⏳ Đang tìm...</div>';
-
   try {
-    const r = await api('searchTransactions', { keyword });
-    if (!r.success) {
-      box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ ${r.message}</div>`;
-      return;
-    }
-    const items = r.results;
-    if (!items || items.length === 0) {
-      box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">Không tìm thấy giao dịch nào</div>';
-      return;
+    const r = await api('searchTransactions', { keyword: kw });
+    if (!r.success) { box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ ${r.message}</div>`; return; }
+    if (!r.results || !r.results.length) {
+      box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">Không tìm thấy kết quả</div>'; return;
     }
     box.innerHTML = `
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Tìm thấy <b>${items.length}</b> giao dịch</div>
-      <div class="rlist">
-        ${items.map(item => `
-          <div class="ritem">
-            <div class="rico ${item.type}">${item.type==='thu'?'💰':'💸'}</div>
-            <div class="rinfo">
-              <div class="rname">${item.tenDoiTuong || '—'}</div>
-              <div class="rdesc">${item.noiDung || '—'} · ${item.ngay || ''}</div>
-            </div>
-            <div class="ramt ${item.type}">${Number(item.soTien||0).toLocaleString('vi-VN')}₫</div>
-          </div>`).join('')}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Tìm thấy <b>${r.results.length}</b> giao dịch</div>
+      <div class="rlist">${r.results.map(item => `
+        <div class="ritem">
+          <div class="rico ${item.type}">${item.type==='thu'?'💰':'💸'}</div>
+          <div class="rinfo">
+            <div class="rname">${item.tenDoiTuong || '—'}</div>
+            <div class="rdesc">${item.noiDung || '—'} · ${item.ngay || ''}</div>
+          </div>
+          <div class="ramt ${item.type}">${Number(item.soTien||0).toLocaleString('vi-VN')}₫</div>
+        </div>`).join('')}
       </div>`;
-  } catch(e) {
-    box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ Lỗi: ${e.message}</div>`;
-  }
+  } catch(e) { box.innerHTML = `<div style="text-align:center;color:var(--chi-d);padding:16px;font-size:13px">❌ ${e.message}</div>`; }
 }
 
 // ================================================================
-//  API HELPERS — với xử lý lỗi chi tiết
+//  DIAGNOSTIC
 // ================================================================
-async function api(action, body = {}) {
-  if (!GAS_URL) throw new Error('Chưa cấu hình URL GAS. Vào Cài đặt → dán URL và nhấn Lưu URL');
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, ...body }),
-      redirect: 'follow'
-    });
-    if (!res.ok) throw new Error(`Server lỗi HTTP ${res.status} — ${getHttpHint(res.status)}`);
-    return res.json();
-  } catch(e) {
-    if (e.message.includes('fetch') || e.message.includes('Failed')) {
-      throw new Error('Không kết nối được GAS. Nhấn nút 🔬 Chẩn đoán trong Cài đặt để xem chi tiết lỗi');
-    }
-    throw e;
+async function runDiagnostic() {
+  const url   = document.getElementById('cfgGasUrl').value.trim() || GAS_URL;
+  const panel = document.getElementById('diagPanel');
+  const log   = document.getElementById('diagLog');
+  panel.style.display = 'block'; log.innerHTML = '';
+
+  function line(icon, label, status, detail='') {
+    const c = { ok:'#4ade80', err:'#f87171', warn:'#fbbf24', info:'#60a5fa', run:'#a78bfa' }[status] || '#94a3b8';
+    log.innerHTML += `<div><span style="color:${c}">${icon}</span> <span style="color:#e2e8f0">${label}</span>${detail?`<br><span style="color:#64748b;padding-left:20px">↳ ${detail}</span>`:''}</div>`;
+    panel.scrollTop = panel.scrollHeight;
   }
+
+  line('⏳','Bắt đầu chẩn đoán...','run');
+  if (!url) { line('❌','URL trống!','err','Dán URL GAS rồi nhấn Lưu URL trước'); return; }
+  if (!url.startsWith('https://script.google.com')) { line('❌','URL sai định dạng','err'); return; }
+  line('✅','URL hợp lệ','ok',url.substring(0,60)+'...');
+
+  line('🌐','Ping GAS server...','info');
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url + '?action=testConnection', { redirect:'follow', signal:ctrl.signal });
+    if (res.ok) {
+      const d = await res.json();
+      line(d.success?'✅':'⚠️', d.success?'GAS OK!':'GAS trả về nhưng success=false', d.success?'ok':'warn', d.message||'');
+    } else { line('❌','HTTP '+res.status,'err'); }
+  } catch(e) {
+    line('❌','Không kết nối được GAS','err', e.name==='AbortError'?'Timeout 8s':''+e.message);
+    line('💡','GỢI Ý: Vào Apps Script → Triển khai → Quản lý → chỉnh sửa → "Bất kỳ ai" → Triển khai lại','warn');
+  }
+
+  line('🔑','Kiểm tra cấu hình API...','info');
+  try {
+    const res = await fetch(url+'?action=getConfig', { redirect:'follow' });
+    const d = await res.json();
+    if (d.success) {
+      line(d.hasSheetId?'✅':'❌', 'Sheet ID: '+(d.hasSheetId?'OK':'CHƯA LƯU'), d.hasSheetId?'ok':'err');
+      line(d.hasGeminiKey?'✅':'❌', 'Gemini Key: '+(d.hasGeminiKey?'OK':'CHƯA LƯU'), d.hasGeminiKey?'ok':'err');
+      if (d.configured) line('🎉','Tất cả đã cấu hình! Sẵn sàng dùng.','ok');
+    }
+  } catch(e) { line('❌','Không đọc được config: '+e.message,'err'); }
+  line('🏁','Chẩn đoán hoàn tất','info');
+}
+
+// ================================================================
+//  API HELPERS
+// ================================================================
+async function api(action, body={}) {
+  if (!GAS_URL) throw new Error('Chưa cấu hình URL GAS. Vào Cài đặt → dán URL → Lưu URL');
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, ...body }),
+    redirect: 'follow'
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
 }
 
 async function gasGet(action) {
   if (!GAS_URL) throw new Error('Chưa cấu hình URL GAS');
   const res = await fetch(`${GAS_URL}?action=${action}`, { redirect: 'follow' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
-function getHttpHint(status) {
-  const h = { 401:'Chưa cấp quyền', 403:'Bị từ chối', 404:'URL sai', 500:'Lỗi GAS server' };
-  return h[status] || '';
-}
-
 // ================================================================
-//  SPEAK
+//  SPEAK – Tiếng Việt TTS (đã sửa cho Android)
 // ================================================================
-function openGoogleSheet() {
-  // Lấy Sheet ID từ localStorage (đã lưu qua saveConfig)
-  const sheetId = localStorage.getItem('cached_sheetId') || '';
-  if (sheetId) {
-    window.open('https://docs.google.com/spreadsheets/d/' + sheetId + '/edit', '_blank');
-  } else {
-    // Thử mở trang Google Sheets chung
-    window.open('https://docs.google.com/spreadsheets', '_blank');
-    toast('💡 Mẹo: Lưu Sheet ID trong Cài đặt để mở trực tiếp!', 'warn');
-  }
-}
-
 function speak(text) {
   if (!prefs.voice || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/[#*_✅💰💸]/g,''));
-  u.lang = 'vi-VN';
-  u.rate = 1.0;
-  window.speechSynthesis.speak(u);
+  const u = new SpeechSynthesisUtterance(text.replace(/[#*_✅💰💸📅👤📝]/g,''));
+  u.lang = 'vi-VN'; u.rate = 0.95;
+
+  function trySpeak() {
+    const voices = window.speechSynthesis.getVoices();
+    const vi = voices.find(v => v.lang === 'vi-VN' || v.lang === 'vi' || v.lang.startsWith('vi'));
+    if (vi) u.voice = vi;
+    window.speechSynthesis.speak(u);
+  }
+
+  if (window.speechSynthesis.getVoices().length > 0) trySpeak();
+  else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null; trySpeak();
+    };
+    setTimeout(trySpeak, 500); // fallback nếu onvoiceschanged không fire
+  }
+}
+
+// ================================================================
+//  GOOGLE SHEET LINK
+// ================================================================
+function openGoogleSheet() {
+  const id = localStorage.getItem('cached_sheetId') || '';
+  if (id) window.open('https://docs.google.com/spreadsheets/d/' + id + '/edit', '_blank');
+  else { window.open('https://docs.google.com/spreadsheets', '_blank'); toast('💡 Lưu Sheet ID trong Cài đặt để mở trực tiếp!', 'warn'); }
 }
 
 // ================================================================
@@ -1163,11 +1141,15 @@ function speak(text) {
 function toast(msg, type='') {
   const c = document.getElementById('toasts');
   const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = msg;
+  el.className = 'toast ' + type; el.textContent = msg;
   c.appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+// ================================================================
+//  INIT
+// ================================================================
+window.onload = () => initAuth();
 </script>
 </body>
 </html>
