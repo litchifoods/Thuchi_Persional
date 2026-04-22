@@ -634,44 +634,25 @@ async function changePassword() {
 }
 
 // ================================================================
-//  QUÊN MẬT KHẨU — dùng resetToken từ Apps Script Properties
+//  QUÊN MẬT KHẨU — mở Google Sheets → sheet CÀI_ĐẶT → xóa ô B1
 // ================================================================
 function showForgotPassword() {
-  const token = prompt(
-    '🔑 HƯỚNG DẪN LẤY LẠI MẬT KHẨU:\n\n' +
-    '1. Vào script.google.com → mở project GAS\n' +
-    '2. Vào ⚙️ Project Settings → Script Properties\n' +
-    '3. Thêm property: resetToken = (tự đặt 1 chuỗi bất kỳ, VD: "reset123")\n' +
-    '4. Nhấn Save\n' +
-    '5. Nhập đúng chuỗi đó vào ô bên dưới:\n\n' +
-    'Nhập resetToken của bạn:'
-  );
-  if (!token) return;
-  resetPasswordWithToken(token.trim());
-}
+  const sheetId = localStorage.getItem('cached_sheetId') || '';
+  const sheetLink = sheetId
+    ? 'https://docs.google.com/spreadsheets/d/' + sheetId + '/edit'
+    : 'https://docs.google.com/spreadsheets';
 
-async function resetPasswordWithToken(token) {
-  const gasUrl = resolveGasUrl() || localStorage.getItem('gasUrl');
-  if (!gasUrl) {
-    alert('Chưa có URL GAS. Hãy nhập URL GAS vào ô bên dưới màn hình đăng nhập trước.');
-    return;
-  }
-  try {
-    const res = await fetch(gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'resetPassword', token }),
-      redirect: 'follow'
-    });
-    const r = await res.json();
-    if (r.success) {
-      alert('✅ ' + r.message + '\n\nMật khẩu đã được reset về "1234".\nHãy đăng nhập và đổi mật khẩu mới ngay!');
-      location.reload();
-    } else {
-      alert('❌ ' + r.message);
-    }
-  } catch(e) {
-    alert('Lỗi kết nối: ' + e.message);
+  const msg =
+    '🔑 CÁCH LẤY LẠI MẬT KHẨU (đơn giản):\n\n' +
+    '1. Mở Google Sheets của bạn\n' +
+    '2. Chọn sheet "CÀI_ĐẶT" (tab dưới cùng)\n' +
+    '3. Tìm ô B2 → XÓA nội dung ô đó → nhấn Enter\n' +
+    '4. Quay lại app → đăng nhập bằng mật khẩu mặc định: 1234\n' +
+    '5. Vào Cài đặt → Đổi mật khẩu ngay!\n\n' +
+    'Nhấn OK để mở Google Sheets ngay bây giờ.';
+
+  if (confirm(msg)) {
+    window.open(sheetLink, '_blank');
   }
 }
 
@@ -1190,12 +1171,59 @@ async function gasGet(action) {
 }
 
 // ================================================================
-//  SPEAK – Tiếng Việt TTS (đã sửa cho Android)
+//  SỐ → TIẾNG VIỆT (để TTS đọc đúng: 120000 → "một trăm hai mươi nghìn")
+// ================================================================
+function soThanhChu(n) {
+  n = Math.abs(Math.round(Number(n)));
+  if (!n || isNaN(n)) return 'không';
+  const don = ['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+  function docNhom(x) {
+    if (x === 0) return '';
+    if (x < 10) return don[x];
+    if (x < 20) {
+      const r = x % 10;
+      return 'mười' + (r === 0 ? '' : r === 5 ? ' lăm' : ' ' + don[r]);
+    }
+    if (x < 100) {
+      const c = Math.floor(x/10), r = x%10;
+      return don[c] + ' mươi' + (r===0?'': r===1?' mốt': r===5?' lăm':' '+don[r]);
+    }
+    const tram = Math.floor(x/100), r = x%100;
+    return don[tram] + ' trăm' + (r===0?'': r<10?' lẻ '+don[r]:' '+docNhom(r));
+  }
+  if (n < 1000) return docNhom(n);
+  if (n < 1000000) {
+    const ngh = Math.floor(n/1000), r = n%1000;
+    return docNhom(ngh)+' nghìn'+(r===0?'': r<100?' lẻ '+docNhom(r):' '+docNhom(r));
+  }
+  if (n < 1000000000) {
+    const tr = Math.floor(n/1000000), r = n%1000000;
+    return docNhom(tr)+' triệu'+(r===0?'': r<100000?' lẻ '+soThanhChu(r):' '+soThanhChu(r));
+  }
+  const ty = Math.floor(n/1000000000), r = n%1000000000;
+  return docNhom(ty)+' tỷ'+(r===0?'':' '+soThanhChu(r));
+}
+
+function chuanBiDoc(text) {
+  // Xóa emoji
+  let t = text.replace(/[\u{1F000}-\u{1FFFF}✅❌⚠️💰💸📅👤📝🔒⚙️🎛️📊🔗💡🏠🎤⌨️🕐#*_—]/gu, ' ');
+  // Chuyển "120.000₫" hoặc "120,000₫" → "một trăm hai mươi nghìn đồng"
+  t = t.replace(/([\d][\d.,]*)\s*₫/g, (_, numStr) => {
+    const n = parseInt(numStr.replace(/[.,\s]/g,''), 10);
+    return isNaN(n) ? '' : soThanhChu(n) + ' đồng';
+  });
+  // Xóa ₫ còn sót
+  t = t.replace(/₫/g, ' đồng');
+  return t.replace(/\s+/g,' ').trim();
+}
+
+// ================================================================
+//  SPEAK – Tiếng Việt TTS
 // ================================================================
 function speak(text) {
   if (!prefs.voice || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/[#*_✅💰💸📅👤📝]/g,''));
+  const u = new SpeechSynthesisUtterance(chuanBiDoc(text));
   u.lang = 'vi-VN'; u.rate = 0.95;
 
   function trySpeak() {
@@ -1210,7 +1238,7 @@ function speak(text) {
     window.speechSynthesis.onvoiceschanged = () => {
       window.speechSynthesis.onvoiceschanged = null; trySpeak();
     };
-    setTimeout(trySpeak, 500); // fallback nếu onvoiceschanged không fire
+    setTimeout(trySpeak, 500);
   }
 }
 
