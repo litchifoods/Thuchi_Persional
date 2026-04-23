@@ -483,23 +483,6 @@ textarea{resize:vertical;min-height:66px}
       <div><div class="set-name">🔊 Phản hồi giọng nói</div><div class="set-desc">AI đọc kết quả sau khi lưu</div></div>
       <label class="toggle"><input type="checkbox" id="pVoice" checked onchange="savePrefs()"><span class="tslider"></span></label>
     </div>
-    <!-- Chọn giọng đọc -->
-    <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:10px">
-      <div><div class="set-name">🗣️ Giọng đọc</div><div class="set-desc">Chọn giọng phù hợp với thiết bị của bạn</div></div>
-      <div style="display:flex;gap:8px;width:100%;flex-wrap:wrap">
-        <select id="pVoiceName" onchange="savePrefs();previewVoice()" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;background:#fff;color:var(--text)">
-          <option value="">-- Đang tải giọng... --</option>
-        </select>
-        <button class="btn btn-outline btn-sm" onclick="previewVoice()" style="flex-shrink:0">▶ Thử</button>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;width:100%">
-        <span style="font-size:12px;color:var(--muted);white-space:nowrap">Tốc độ:</span>
-        <input type="range" id="pVoiceRate" min="0.5" max="1.5" step="0.05" value="0.95"
-          oninput="document.getElementById('pVoiceRateVal').textContent=this.value;savePrefs()"
-          style="flex:1">
-        <span id="pVoiceRateVal" style="font-size:12px;color:var(--text);min-width:28px">0.95</span>
-      </div>
-    </div>
     <div class="set-row">
       <div><div class="set-name">📱 Gửi Telegram</div><div class="set-desc">Thông báo sau mỗi giao dịch</div></div>
       <label class="toggle"><input type="checkbox" id="pTelegram" onchange="savePrefs()"><span class="tslider"></span></label>
@@ -818,11 +801,9 @@ function showSetupBanner(show) { document.getElementById('setupBanner').classLis
 // ================================================================
 function savePrefs() {
   prefs = {
-    voice:     document.getElementById('pVoice').checked,
-    telegram:  document.getElementById('pTelegram').checked,
-    autoSave:  document.getElementById('pAutoSave').checked,
-    voiceName: (document.getElementById('pVoiceName') || {}).value || '',
-    voiceRate: parseFloat((document.getElementById('pVoiceRate') || {}).value || '0.95')
+    voice:    document.getElementById('pVoice').checked,
+    telegram: document.getElementById('pTelegram').checked,
+    autoSave: document.getElementById('pAutoSave').checked
   };
   localStorage.setItem('prefs', JSON.stringify(prefs));
 }
@@ -832,55 +813,7 @@ function loadPrefs() {
   document.getElementById('pVoice').checked    = prefs.voice !== false;
   document.getElementById('pTelegram').checked = !!prefs.telegram;
   document.getElementById('pAutoSave').checked = !!prefs.autoSave;
-  // Khôi phục tốc độ đọc
-  const rate = prefs.voiceRate || 0.95;
-  const rateEl = document.getElementById('pVoiceRate');
-  if (rateEl) { rateEl.value = rate; document.getElementById('pVoiceRateVal').textContent = rate; }
-  // Load danh sách giọng (cần chờ trình duyệt tải xong)
-  loadVoiceList();
 }
-
-function loadVoiceList() {
-  const sel = document.getElementById('pVoiceName');
-  if (!sel || !window.speechSynthesis) return;
-
-  function populate() {
-    const voices = window.speechSynthesis.getVoices();
-    const viVoices = voices.filter(v => v.lang === 'vi-VN' || v.lang === 'vi' || v.lang.startsWith('vi'));
-    const allUsable = viVoices.length > 0 ? viVoices : voices.slice(0, 20);
-
-    sel.innerHTML = '';
-    // Option mặc định
-    const defOpt = document.createElement('option');
-    defOpt.value = ''; defOpt.textContent = '🔄 Mặc định (tự chọn)';
-    sel.appendChild(defOpt);
-
-    allUsable.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v.name;
-      // Đoán giới tính từ tên giọng
-      const nameLow = v.name.toLowerCase();
-      const gender = nameLow.includes('female') || nameLow.includes('woman') || nameLow.includes('girl')
-        ? '👩' : nameLow.includes('male') || nameLow.includes('man') || nameLow.includes('boy')
-        ? '👨' : '🔊';
-      opt.textContent = gender + ' ' + v.name + (v.localService ? ' (offline)' : '');
-      sel.appendChild(opt);
-    });
-
-    // Khôi phục lựa chọn đã lưu
-    if (prefs.voiceName) sel.value = prefs.voiceName;
-  }
-
-  if (window.speechSynthesis.getVoices().length > 0) populate();
-  else window.speechSynthesis.onvoiceschanged = () => { populate(); window.speechSynthesis.onvoiceschanged = null; };
-}
-
-function previewVoice() {
-  // Lưu lựa chọn trước khi thử
-  savePrefs();
-  speak('Đã lưu khoản thu hai triệu từ anh Hùng');
-}
-
 
 // ================================================================
 //  TAB NAVIGATION
@@ -1064,17 +997,15 @@ async function loadSummary() {
     const tsEl = document.getElementById('syncTimestamp');
     if (tsEl && r.lastModified) tsEl.textContent = 'Đồng bộ lúc ' + r.lastModified;
 
-    // Dùng allRecent từ server (đã gộp thu+chi, sort đúng thứ tự thời gian + rowIndex)
-    const items = (r.allRecent || (() => {
-      // fallback nếu server cũ chưa có allRecent
-      return [
-        ...(r.recentThu||[]),
-        ...(r.recentChi||[])
-      ].sort((a,b) => {
-        const p = s => { if(!s)return 0; const m=s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/); return m?new Date(m[3],m[2]-1,m[1],m[4]||0,m[5]||0).getTime():0; };
-        return p(b.ngay) - p(a.ngay);
-      });
-    })()).slice(0, 10);
+    // Dùng allRecent từ server — đã gộp thu+chi, sort đúng thứ tự thời gian
+    // Server sort theo ngayMs + rowIndex nên cả voice lẫn text đều lên đúng vị trí
+    const items = (r.allRecent || [
+      ...(r.recentThu||[]),
+      ...(r.recentChi||[])
+    ].sort((a,b)=>{
+      const p=s=>{if(!s)return 0;const m=s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);return m?new Date(m[3],m[2]-1,m[1],m[4]||0,m[5]||0).getTime():0;};
+      return p(b.ngay)-p(a.ngay);
+    })).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
@@ -1289,24 +1220,12 @@ function speak(text) {
   if (!prefs.voice || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(chuanBiDoc(text));
-  u.lang = 'vi-VN';
-  u.rate = prefs.voiceRate || 0.95;
+  u.lang = 'vi-VN'; u.rate = 0.95;
 
   function trySpeak() {
     const voices = window.speechSynthesis.getVoices();
-    const viVoices = voices.filter(v => v.lang === 'vi-VN' || v.lang === 'vi' || v.lang.startsWith('vi'));
-
-    if (viVoices.length > 0) {
-      // Nếu người dùng đã chọn giọng cụ thể
-      const savedName = prefs.voiceName || '';
-      if (savedName) {
-        const picked = viVoices.find(v => v.name === savedName);
-        if (picked) { u.voice = picked; }
-        else { u.voice = viVoices[0]; }
-      } else {
-        u.voice = viVoices[0];
-      }
-    }
+    const vi = voices.find(v => v.lang === 'vi-VN' || v.lang === 'vi' || v.lang.startsWith('vi'));
+    if (vi) u.voice = vi;
     window.speechSynthesis.speak(u);
   }
 
