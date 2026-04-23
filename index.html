@@ -997,18 +997,19 @@ async function loadSummary() {
     const tsEl = document.getElementById('syncTimestamp');
     if (tsEl && r.lastModified) tsEl.textContent = 'Đồng bộ lúc ' + r.lastModified;
 
-    // Dùng recentAll từ server (đã gộp THU+CHI và sort đúng thứ tự)
-    // Tránh lỗi sort sai khi nhập bằng voice
-    const items = (r.recentAll && r.recentAll.length)
-      ? r.recentAll.slice(0, 10)
-      : [...(r.recentThu||[]), ...(r.recentChi||[])].sort((a,b) => {
-          const parseVN = s => {
-            if (!s) return 0;
-            const p = s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);
-            return p ? new Date(p[3], p[2]-1, p[1], p[4]||0, p[5]||0).getTime() : 0;
-          };
-          return parseVN(b.ngay) - parseVN(a.ngay);
-        }).slice(0, 10);
+    // Gộp thu + chi, sắp xếp theo ngày+giờ mới nhất lên trên
+    // Dùng allRecent từ server — đã gộp + sort đúng thứ tự, cả voice lẫn text đều nhất quán
+    const items = (r.allRecent || [
+      ...(r.recentThu||[]),
+      ...(r.recentChi||[])
+    ].sort((a,b) => {
+      const parseVN = s => {
+        if (!s) return 0;
+        const p = s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);
+        return p ? new Date(p[3], p[2]-1, p[1], p[4]||0, p[5]||0).getTime() : 0;
+      };
+      return parseVN(b.ngay) - parseVN(a.ngay);
+    })).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
