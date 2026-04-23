@@ -931,7 +931,11 @@ function showModal(data) {
     let val = data[f.k] || '';
     if (f.k === 'ngay' && val && val.includes('/')) {
       const m = val.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${(m[4]||'00').padStart(2,'0')}:${(m[5]||'00').padStart(2,'0')}`;
+      // Nếu AI không trả về giờ (voice nhập) → dùng giờ hiện tại thay vì 00:00
+      const _now = new Date();
+      const _hh = String(m[4] !== undefined ? m[4] : _now.getHours()).padStart(2,'0');
+      const _mm = String(m[5] !== undefined ? m[5] : _now.getMinutes()).padStart(2,'0');
+      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_hh}:${_mm}`;
     }
     return `<div class="cfg-field"><label>${f.label}</label><input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/></div>`;
   }).join('');
@@ -997,15 +1001,19 @@ async function loadSummary() {
     const tsEl = document.getElementById('syncTimestamp');
     if (tsEl && r.lastModified) tsEl.textContent = 'Đồng bộ lúc ' + r.lastModified;
 
-    // Dùng allRecent từ server — đã gộp thu+chi, sort đúng thứ tự thời gian
-    // Server sort theo ngayMs + rowIndex nên cả voice lẫn text đều lên đúng vị trí
-    const items = (r.allRecent || [
+    // Gộp thu + chi, sắp xếp theo ngày+giờ mới nhất lên trên
+    const items = [
       ...(r.recentThu||[]),
       ...(r.recentChi||[])
-    ].sort((a,b)=>{
-      const p=s=>{if(!s)return 0;const m=s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);return m?new Date(m[3],m[2]-1,m[1],m[4]||0,m[5]||0).getTime():0;};
-      return p(b.ngay)-p(a.ngay);
-    })).slice(0, 10);
+    ].sort((a,b) => {
+      // Parse DD/MM/YYYY HH:MM — lấy cả giờ để sort chính xác
+      const parseVN = s => {
+        if (!s) return 0;
+        const p = s.match(/(\d+)\/(\d+)\/(\d+)(?:\s+(\d+):(\d+))?/);
+        return p ? new Date(p[3], p[2]-1, p[1], p[4]||0, p[5]||0).getTime() : 0;
+      };
+      return parseVN(b.ngay) - parseVN(a.ngay);
+    }).slice(0, 10);
 
     const list = document.getElementById('recentList');
     if (!items.length) {
