@@ -886,7 +886,16 @@ async function doAnalyze() {
   btn.innerHTML = '<span class="spin"></span> Đang phân tích...'; btn.disabled = true;
   try {
     const r = await api('analyze', { text });
-    if (r.success) { if (prefs.autoSave) doSave(r.parsed); else showModal(r.parsed); }
+    if (r.success) {
+      // Đảm bảo ngay luôn có giờ phút — nếu AI không trả về thì gán giờ hiện tại
+      const parsed = r.parsed;
+      if (parsed.ngay && !parsed.ngay.match(/\d{1,2}:\d{2}/)) {
+        const _n = new Date();
+        const _p = n => String(n).padStart(2,'0');
+        parsed.ngay = parsed.ngay.trim() + ' ' + _p(_n.getHours()) + ':' + _p(_n.getMinutes());
+      }
+      if (prefs.autoSave) doSave(parsed); else showModal(parsed);
+    }
     else toast(r.message || 'Lỗi phân tích', 'err');
   } catch(e) { toast('Lỗi: ' + e.message, 'err'); }
   btn.innerHTML = '🔍 Phân Tích AI'; btn.disabled = false;
@@ -931,11 +940,11 @@ function showModal(data) {
     let val = data[f.k] || '';
     if (f.k === 'ngay' && val && val.includes('/')) {
       const m = val.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-      // Nếu AI không trả về giờ (voice nhập) → dùng giờ hiện tại thay vì 00:00
-      const _now = new Date();
-      const _hh = String(m[4] !== undefined ? m[4] : _now.getHours()).padStart(2,'0');
-      const _mm = String(m[5] !== undefined ? m[5] : _now.getMinutes()).padStart(2,'0');
-      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_hh}:${_mm}`;
+      // Nếu AI không trả về giờ → dùng giờ hiện tại thay vì 00:00
+      const _now2 = new Date();
+      const _hh2 = String(m[4] !== undefined ? m[4] : _now2.getHours()).padStart(2,'0');
+      const _mm2 = String(m[5] !== undefined ? m[5] : _now2.getMinutes()).padStart(2,'0');
+      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_hh2}:${_mm2}`;
     }
     return `<div class="cfg-field"><label>${f.label}</label><input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/></div>`;
   }).join('');
