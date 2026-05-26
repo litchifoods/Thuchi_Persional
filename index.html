@@ -352,7 +352,7 @@ textarea{resize:vertical;min-height:66px}
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
       <div class="voice-hint" id="vHint">Nhấn để ghi âm — nói tự nhiên tiếng Việt</div>
     </div>
-    <div class="voice-text" id="vText">Ví dụ: "Thu 2 triệu từ anh Hùng ở Phường Chũ tiền bán ghế hôm nay"</div>
+    <div class="voice-text" id="vText">Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán ghế hôm nay"</div>
     <div style="margin-top:10px">
       <button class="btn btn-gold btn-full" id="analyzeBtn" onclick="doAnalyze()" style="display:none">
         🔍 Phân Tích AI
@@ -368,7 +368,7 @@ textarea{resize:vertical;min-height:66px}
     </div>
     <div class="fgrow">
       <div class="fg"><label>📅 Ngày giờ</label><input type="datetime-local" id="fDate"/></div>
-      <div class="fg"><label>💵 Số tiền (₫)</label><input type="number" id="fAmount" placeholder="1500000"/></div>
+      <div class="fg"><label>💵 Số tiền (₫)</label><input type="text" inputmode="numeric" id="fAmount" placeholder="200,000" oninput="fmtAmountInput(this)" autocomplete="off"/></div>
     </div>
     <div class="fgrow">
       <div class="fg"><label>👤 Tên đối tượng</label><input type="text" id="fName" placeholder="Tên người..."/></div>
@@ -703,6 +703,31 @@ function appInit() {
   }
 }
 
+// Format số tiền có dấu phẩy ngăn cách hàng nghìn khi người dùng gõ
+// VD: gõ "200000" → hiển thị "200,000" — khi lấy giá trị thì bỏ dấu phẩy
+function fmtAmountInput(input) {
+  // Chỉ giữ lại chữ số
+  const raw = input.value.replace(/[^0-9]/g, '');
+  // Lưu giá trị thuần vào data attribute
+  input.dataset.raw = raw;
+  // Hiển thị có dấu phẩy theo locale Việt Nam
+  if (raw === '') {
+    input.value = '';
+  } else {
+    input.value = Number(raw).toLocaleString('vi-VN');
+  }
+  // Giữ con trỏ ở cuối
+  const len = input.value.length;
+  input.setSelectionRange(len, len);
+}
+
+// Lấy giá trị số thuần từ input đã được format
+function getRawAmount(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return '';
+  return (el.dataset.raw || el.value.replace(/[^0-9]/g, ''));
+}
+
 function setNow() {
   const now = new Date(), p = n => String(n).padStart(2,'0');
   document.getElementById('fDate').value =
@@ -886,16 +911,7 @@ async function doAnalyze() {
   btn.innerHTML = '<span class="spin"></span> Đang phân tích...'; btn.disabled = true;
   try {
     const r = await api('analyze', { text });
-    if (r.success) {
-      // Đảm bảo ngay luôn có giờ phút — nếu AI không trả về thì gán giờ hiện tại
-      const parsed = r.parsed;
-      if (parsed.ngay && !parsed.ngay.match(/\d{1,2}:\d{2}/)) {
-        const _n = new Date();
-        const _p = n => String(n).padStart(2,'0');
-        parsed.ngay = parsed.ngay.trim() + ' ' + _p(_n.getHours()) + ':' + _p(_n.getMinutes());
-      }
-      if (prefs.autoSave) doSave(parsed); else showModal(parsed);
-    }
+    if (r.success) { if (prefs.autoSave) doSave(r.parsed); else showModal(r.parsed); }
     else toast(r.message || 'Lỗi phân tích', 'err');
   } catch(e) { toast('Lỗi: ' + e.message, 'err'); }
   btn.innerHTML = '🔍 Phân Tích AI'; btn.disabled = false;
@@ -908,7 +924,7 @@ function submitForm() {
   const data = {
     type:        curType,
     ngay:        document.getElementById('fDate').value,
-    soTien:      document.getElementById('fAmount').value,
+    soTien:      getRawAmount('fAmount'),
     tenDoiTuong: document.getElementById('fName').value.trim(),
     diaChi:      curType==='thu' ? document.getElementById('fAddr').value.trim() : '',
     noiDung:     document.getElementById('fNote').value.trim()
@@ -930,7 +946,7 @@ function showModal(data) {
 
   const fields = [
     { k:'ngay', label:'📅 Ngày giờ', type:'datetime-local' },
-    { k:'soTien', label:'💵 Số tiền (₫)', type:'number' },
+    { k:'soTien', label:'💵 Số tiền (₫)', type:'text', inputmode:'numeric' },
     { k:'tenDoiTuong', label:'👤 Tên đối tượng', type:'text' },
     ...(isThu ? [{ k:'diaChi', label:'📍 Địa chỉ', type:'text' }] : []),
     { k:'noiDung', label:'📝 Nội dung', type:'text' }
@@ -940,11 +956,16 @@ function showModal(data) {
     let val = data[f.k] || '';
     if (f.k === 'ngay' && val && val.includes('/')) {
       const m = val.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-      // Nếu AI không trả về giờ → dùng giờ hiện tại thay vì 00:00
-      const _now2 = new Date();
-      const _hh2 = String(m[4] !== undefined ? m[4] : _now2.getHours()).padStart(2,'0');
-      const _mm2 = String(m[5] !== undefined ? m[5] : _now2.getMinutes()).padStart(2,'0');
-      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_hh2}:${_mm2}`;
+      // Nếu AI không trả về giờ → dùng giờ hiện tại
+      const _n2 = new Date();
+      const _h2 = String(m && m[4] !== undefined ? m[4] : _n2.getHours()).padStart(2,'0');
+      const _m2 = String(m && m[5] !== undefined ? m[5] : _n2.getMinutes()).padStart(2,'0');
+      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_h2}:${_m2}`;
+    }
+    // soTien: hiển thị có dấu phẩy để dễ đọc
+    if (f.k === 'soTien' && val) {
+      val = Number(String(val).replace(/[^0-9]/g,'')).toLocaleString('vi-VN');
+      return `<div class="cfg-field"><label>${f.label}</label><input type="text" inputmode="numeric" id="mf_${f.k}" value="${val}" placeholder="${f.label}" oninput="fmtAmountInput(this)"/></div>`;
     }
     return `<div class="cfg-field"><label>${f.label}</label><input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/></div>`;
   }).join('');
@@ -956,10 +977,13 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 
 function confirmSave() {
   const data = { ...pending };
+  // Đọc giá trị từ modal, riêng soTien bỏ dấu phẩy lấy số thuần
   ['ngay','soTien','tenDoiTuong','diaChi','noiDung'].forEach(k => {
     const el = document.getElementById('mf_' + k);
     if (el) data[k] = el.value;
   });
+  // Bỏ dấu phẩy trong soTien trước khi lưu
+  if (data.soTien) data.soTien = String(data.soTien).replace(/[^0-9]/g, '');
   closeModal(); doSave(data);
 }
 
@@ -984,7 +1008,7 @@ async function doSave(data) {
 function resetForms() {
   document.getElementById('vText').textContent = 'Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán ghế hôm nay"';
   document.getElementById('analyzeBtn').style.display = 'none';
-  document.getElementById('fAmount').value = '';
+  document.getElementById('fAmount').value = ''; document.getElementById('fAmount').dataset.raw = '';
   document.getElementById('fName').value   = '';
   document.getElementById('fAddr').value   = '';
   document.getElementById('fNote').value   = '';
