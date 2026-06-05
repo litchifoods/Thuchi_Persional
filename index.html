@@ -281,6 +281,53 @@ textarea{resize:vertical;min-height:66px}
   .nav-logo{font-size:14px}
   .tab-btn{padding:6px 9px;font-size:11px}
 }
+
+/* ── DESKTOP: màn hình >= 768px ── */
+@media(min-width:768px){
+  body{font-size:16px}
+  .main{max-width:860px;padding:24px 28px 80px}
+  .nav-inner{padding:14px 28px}
+  .nav-logo{font-size:20px;letter-spacing:-.3px}
+  .tab-btn{padding:10px 20px;font-size:14px;border-radius:11px}
+  .card{padding:26px 30px;border-radius:18px;margin-bottom:20px}
+  .card-title{font-size:16px;margin-bottom:18px}
+  .sum-grid{gap:16px;margin-bottom:20px}
+  .sum-card{padding:20px 16px;border-radius:14px}
+  .sum-label{font-size:12px;letter-spacing:.6px}
+  .sum-val{font-size:20px}
+  .voice-btn{width:96px;height:96px;font-size:38px}
+  .voice-hint{font-size:14px}
+  .voice-text{font-size:15px;padding:16px;min-height:56px}
+  label{font-size:13px}
+  input,textarea,select{font-size:16px;padding:13px 16px;border-radius:12px}
+  .fgrow{grid-template-columns:1fr 1fr;gap:16px}
+  .type-tabs{gap:12px;margin-bottom:18px}
+  .type-tab{padding:13px;font-size:16px;border-radius:13px}
+  .btn{padding:13px 24px;font-size:15px;border-radius:13px}
+  .ritem{padding:14px 16px;border-radius:14px;gap:14px}
+  .rico{width:46px;height:46px;font-size:22px;border-radius:12px}
+  .rname{font-size:15px}
+  .rdesc{font-size:13px}
+  .ramt{font-size:16px}
+  .chat-box{max-height:480px}
+  .cbub{font-size:15px;padding:13px 18px}
+  .chat-in{font-size:15px;padding:13px 16px}
+  .set-name{font-size:16px}
+  .set-desc{font-size:13px}
+  .cfg-field label{font-size:13px}
+  .modal{max-width:540px;padding:32px}
+  .modal-title{font-size:20px}
+  .mtable{font-size:15px}
+  .mtable th,.mtable td{padding:11px 10px}
+  .qbtns .btn{padding:9px 14px;font-size:13px}
+  #syncTimestamp{font-size:12px}
+}
+
+/* ── WIDE DESKTOP: >= 1100px ── */
+@media(min-width:1100px){
+  .main{max-width:1020px}
+  .sum-val{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -368,7 +415,7 @@ textarea{resize:vertical;min-height:66px}
     </div>
     <div class="fgrow">
       <div class="fg"><label>📅 Ngày giờ</label><input type="datetime-local" id="fDate"/></div>
-      <div class="fg"><label>💵 Số tiền (₫)</label><input type="number" id="fAmount" placeholder="1500000"/></div>
+      <div class="fg"><label>💵 Số tiền (₫)</label><input type="text" inputmode="numeric" id="fAmount" placeholder="200.000" oninput="fmtAmountInput(this)" autocomplete="off"/></div>
     </div>
     <div class="fgrow">
       <div class="fg"><label>👤 Tên đối tượng</label><input type="text" id="fName" placeholder="Tên người..."/></div>
@@ -442,7 +489,7 @@ textarea{resize:vertical;min-height:66px}
     <div id="cfgForm">
       <div class="cfg-field">
         <label>📊 Google Sheet ID</label>
-        <input type="password" id="cfgSheetId" placeholder="Dán Sheet ID vào đây..." autocomplete="off"/>
+        <input type="text" id="cfgSheetId" placeholder="Dán Sheet ID vào đây..."/>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Lấy từ URL: spreadsheets/d/<b>[ID NÀY]</b>/edit</div>
       </div>
       <div class="cfg-field">
@@ -455,7 +502,7 @@ textarea{resize:vertical;min-height:66px}
       </div>
       <div class="cfg-field">
         <label>📱 Telegram Chat ID (tùy chọn)</label>
-        <input type="password" id="cfgTgChat" placeholder="-100123456789" autocomplete="off"/>
+        <input type="text" id="cfgTgChat" placeholder="-100123456789"/>
       </div>
       <button class="btn btn-primary btn-full" id="saveCfgBtn" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
     </div>
@@ -465,7 +512,7 @@ textarea{resize:vertical;min-height:66px}
     <div class="card-title">🔗 URL Google Apps Script</div>
     <div class="cfg-field">
       <label>Dán Web App URL (kết thúc /exec)</label>
-      <input type="password" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"/>
+      <input type="url" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec"/>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button class="btn btn-gold" style="flex:2" onclick="saveGasUrl()">✅ Lưu URL</button>
@@ -496,7 +543,12 @@ textarea{resize:vertical;min-height:66px}
   <!-- ĐỔI MẬT KHẨU -->
   <div class="card">
     <div class="card-title">🔒 Bảo Mật & Mật Khẩu</div>
-
+    <!-- Thông tin mật khẩu server -->
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#166534;line-height:1.7">
+      🔐 <b>Mật khẩu lưu trên Google Apps Script server</b> — dùng chung cho mọi thiết bị, mọi trình duyệt.<br>
+      📌 Mật khẩu mặc định: <b>1234</b><br>
+      💡 Đổi mật khẩu bên dưới sẽ có hiệu lực ngay với tất cả thiết bị.
+    </div>
     <div class="pwd-section">
       <h4>Đổi Mật Khẩu</h4>
       <div class="cfg-field"><label>Mật khẩu hiện tại</label><input type="password" id="pwdOld" placeholder="Nhập mật khẩu hiện tại"/></div>
@@ -568,7 +620,7 @@ async function doLogin() {
     const h = await sha256(pwd);
     const DEFAULT = await sha256('1234');
     if (h !== DEFAULT) {
-      document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng, thử lại!';
+      document.getElementById('loginErr').textContent = '❌ Mật khẩu không đúng (mặc định: 1234)';
       document.getElementById('loginPwd').value = ''; document.getElementById('loginPwd').focus(); return;
     }
     _finishLogin(); return;
@@ -642,7 +694,7 @@ function showForgotPassword() {
     '1. Mở Google Sheets của bạn\n' +
     '2. Chọn sheet "CÀI_ĐẶT" (tab dưới cùng)\n' +
     '3. Tìm ô B2 → XÓA nội dung ô đó → nhấn Enter\n' +
-    '4. Quay lại app → đăng nhập bằng mật khẩu mặc định của bạn\n' +
+    '4. Quay lại app → đăng nhập bằng mật khẩu mặc định: 1234\n' +
     '5. Vào Cài đặt → Đổi mật khẩu ngay!\n\n' +
     'Nhấn OK để mở Google Sheets ngay bây giờ.';
 
@@ -696,6 +748,23 @@ function appInit() {
     showSetupBanner(true);
     setConnStatus('error');
   }
+}
+
+// ── Format số tiền có dấu chấm ngăn cách hàng nghìn ─────────────
+// Gõ "200000" → hiện "200.000" | Gõ "1500000" → hiện "1.500.000"
+function fmtAmountInput(input) {
+  const raw = input.value.replace(/[^0-9]/g, '');
+  input.dataset.raw = raw;
+  input.value = raw === '' ? '' : Number(raw).toLocaleString('vi-VN');
+  const len = input.value.length;
+  input.setSelectionRange(len, len);
+}
+
+// Lấy số thuần từ input đã format (bỏ dấu chấm)
+function getRawAmount(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return '';
+  return el.dataset.raw || el.value.replace(/[^0-9]/g, '');
 }
 
 function setNow() {
@@ -881,7 +950,16 @@ async function doAnalyze() {
   btn.innerHTML = '<span class="spin"></span> Đang phân tích...'; btn.disabled = true;
   try {
     const r = await api('analyze', { text });
-    if (r.success) { if (prefs.autoSave) doSave(r.parsed); else showModal(r.parsed); }
+    if (r.success) {
+      const parsed = r.parsed;
+      // Nếu AI không trả về giờ phút → gán giờ hiện tại
+      if (parsed.ngay && !parsed.ngay.match(/\d{1,2}:\d{2}/)) {
+        const _n = new Date();
+        const _p = n => String(n).padStart(2,'0');
+        parsed.ngay = parsed.ngay.trim() + ' ' + _p(_n.getHours()) + ':' + _p(_n.getMinutes());
+      }
+      if (prefs.autoSave) doSave(parsed); else showModal(parsed);
+    }
     else toast(r.message || 'Lỗi phân tích', 'err');
   } catch(e) { toast('Lỗi: ' + e.message, 'err'); }
   btn.innerHTML = '🔍 Phân Tích AI'; btn.disabled = false;
@@ -894,7 +972,7 @@ function submitForm() {
   const data = {
     type:        curType,
     ngay:        document.getElementById('fDate').value,
-    soTien:      document.getElementById('fAmount').value,
+    soTien:      getRawAmount('fAmount'),
     tenDoiTuong: document.getElementById('fName').value.trim(),
     diaChi:      curType==='thu' ? document.getElementById('fAddr').value.trim() : '',
     noiDung:     document.getElementById('fNote').value.trim()
@@ -916,7 +994,7 @@ function showModal(data) {
 
   const fields = [
     { k:'ngay', label:'📅 Ngày giờ', type:'datetime-local' },
-    { k:'soTien', label:'💵 Số tiền (₫)', type:'number' },
+    { k:'soTien', label:'💵 Số tiền (₫)', type:'text' },
     { k:'tenDoiTuong', label:'👤 Tên đối tượng', type:'text' },
     ...(isThu ? [{ k:'diaChi', label:'📍 Địa chỉ', type:'text' }] : []),
     { k:'noiDung', label:'📝 Nội dung', type:'text' }
@@ -926,7 +1004,15 @@ function showModal(data) {
     let val = data[f.k] || '';
     if (f.k === 'ngay' && val && val.includes('/')) {
       const m = val.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${(m[4]||'00').padStart(2,'0')}:${(m[5]||'00').padStart(2,'0')}`;
+      const _n = new Date();
+      const _h = String(m && m[4] !== undefined ? m[4] : _n.getHours()).padStart(2,'0');
+      const _m = String(m && m[5] !== undefined ? m[5] : _n.getMinutes()).padStart(2,'0');
+      if (m) val = `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}T${_h}:${_m}`;
+    }
+    // soTien: hiển thị có dấu chấm, khi sửa cũng format tự động
+    if (f.k === 'soTien') {
+      const fmtVal = val ? Number(String(val).replace(/[^0-9]/g,'')).toLocaleString('vi-VN') : '';
+      return `<div class="cfg-field"><label>${f.label}</label><input type="text" inputmode="numeric" id="mf_${f.k}" value="${fmtVal}" placeholder="${f.label}" oninput="fmtAmountInput(this)"/></div>`;
     }
     return `<div class="cfg-field"><label>${f.label}</label><input type="${f.type}" id="mf_${f.k}" value="${val}" placeholder="${f.label}"/></div>`;
   }).join('');
@@ -942,6 +1028,8 @@ function confirmSave() {
     const el = document.getElementById('mf_' + k);
     if (el) data[k] = el.value;
   });
+  // Bỏ dấu chấm trong soTien trước khi lưu → lấy số thuần
+  if (data.soTien) data.soTien = String(data.soTien).replace(/[^0-9]/g, '');
   closeModal(); doSave(data);
 }
 
@@ -966,7 +1054,7 @@ async function doSave(data) {
 function resetForms() {
   document.getElementById('vText').textContent = 'Ví dụ: "Thu 2 triệu từ anh Hùng tiền bán ghế hôm nay"';
   document.getElementById('analyzeBtn').style.display = 'none';
-  document.getElementById('fAmount').value = '';
+  document.getElementById('fAmount').value = ''; document.getElementById('fAmount').dataset.raw = '';
   document.getElementById('fName').value   = '';
   document.getElementById('fAddr').value   = '';
   document.getElementById('fNote').value   = '';
